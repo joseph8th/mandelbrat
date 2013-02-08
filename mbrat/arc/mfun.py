@@ -1,4 +1,5 @@
-# Python code here
+# MandelFun python mandelbrot crypto functions
+# Joseph Edwards VIII <joseph8th@urcomics.com>
 
 def mandel(n, m, itermax, xmin, xmax, ymin, ymax):
   ix, iy = mgrid[0:n, 0:m]
