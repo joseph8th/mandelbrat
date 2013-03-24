@@ -1,61 +1,83 @@
 import png
 import random
 from os import path
-from mbrat.settings import cmap_fun
-from mpoint import MPoint
+from bigfloat import BigFloat, add, sub, div, floor, precision
+
+from mbrat.settings import cmap_fun, MBRAT_DEF_PRECISION
+from mbrat.lib.mpoint import MPoint
 
 
 class PyMScreen(object):
     """
     Class to encapsulate set-rendering matrix, handle mpoint objects,
-    and generate image objects to spec.
+    and generate image objects to spec. Implements GNU MPFR via the
+    Bigfloat library, or generates a Mandelbrot set using Python floats.
 
     """
 
-    def __init__(self, args):
-        if hasattr(args, 'command'):
-            self._init_new(args)
-        else:
+    def __init__(self, args=None):
+        if args != None:
             self._init_from(args)
 
+
+    def _init_from(self, args):
+
+        from mbrat.util import Arguments
+        # 1st set the precision ...
+        if not hasattr(args, 'prec'):
+            args.prec = MBRAT_DEF_PRECISION
+        self.prec = int(args.prec)
+
+        # ... make sure lims dict is right ...
+        if not hasattr(args, 'lims'):
+            self.limits = { 'low': complex(float(args.x_lo), float(args.y_lo)),
+                            'high': complex(float(args.x_hi), float(args.y_hi)), }
+        else:
+            self.limits = args.lims
+
+        # ... init the core stuff ...
+        self._init_new(args)
+
+        # ... if 'ini_d' dict provided then init more depending...
+        if hasattr(args, 'ini_d'):
+            if 'image' in args.ini_d:
+                self.gen_mscreen_from_img( args.ini_d['image'] )
+
+
     def _init_new(self, args):
+        l = self.limits
+
         self.ppu = int(args.ppu)
-        l = self.limits = args.lims
-        self.width = l['high'].real - l['low'].real
-        self.height = l['high'].imag - l['low'].imag
-        self.px_width = int(self.width * self.ppu)
-        self.px_height = int(self.height * self.ppu)
+        self.width = sub( l['high'].real, l['low'].real )
+        self.height = sub( l['high'].imag, l['low'].imag )
+        self.px_width = floor(self.width * self.ppu)
+        self.px_height = floor(self.height * self.ppu)
         self.iters = int(args.iters)
         self.cmap = cmap_fun(args.cmap)
         self.screen = None
 
-    def _init_from(self, args):
-        if not hasattr(args, 'lims'):
-            args.lims = { 'low': complex(float(args.x_lo), float(args.y_lo)),
-                          'high': complex(float(args.x_hi), float(args.y_hi)), }
-        self._init_new(args)
 
-        # if 'ini_d' dict provided then init more depending...
-        if hasattr(args, 'ini_d'):
-            if 'image' in args.ini_d:
-                self.gen_mscreen_from_img( args.ini_d['image'] )
+    def set_params(self, args):
+        self._init_from(args)
 
 
     # primary generators
 
     def gen_mscreen(self):
         """
-        Generate a set-rendering matrix set to the current instance properties.
-        """
+        Generate a set-rendering matrix set to the current instance properties. """
+
+#        with precision(self.prec):
         d = 1.0/self.ppu
         rows = []
         for iy in range(self.px_height):
             rows.append([])
             for ix in range(self.px_width):
                 x = self.limits['low'].real + d*(0.5 + ix)
-                y = self.limits['high'].imag - d*(0.5 + iy)
-                rows[iy].append(MPoint(x,y))
+                y = self.limits['high'].imag + d*(0.5 + iy)
+                rows[iy].append( MPoint(x, y, int(self.prec/3.333)) )
                 rows[iy][ix].Set_Index(ix, iy)
+
         self.screen = rows
 
 
@@ -123,6 +145,7 @@ class PyMScreen(object):
 
     def get_info(self):
         ms_info = "MBrat Screen Settings:\n"
+        ms_info += "\tprecision = {} bits\n".format(self.prec)
         ms_info += "\tlimits: [z_lo, z_hi] = [ "
         ms_info += "({0.real:.3}, {0.imag:.3}), ".format(self.limits['low'])
         ms_info += "({0.real:.3}, {0.imag:.3}) ]\n".format(self.limits['high'])

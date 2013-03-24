@@ -187,9 +187,11 @@ class ConfigCommand(object):
         # MScreen method returns a random MPoint object
         pt = ms.get_mpoint()
         print "==> Point picked: (x,y) = ", pt.c
+        print "  -> Index: [ix,iy] = [{0}, {1}]".format( pt.Get_ix(), pt.Get_iy() )
         # update current *key config file
         self.config.reset_section()
-        self.config.set_write( {'real': pt.real, 'imag': pt.imag,} )
+        self.config.set_write( {'real': pt.real, 'imag': pt.imag,
+                                'ix': pt.Get_ix(), 'iy': pt.Get_iy()} )
 
 
 ### load subcommands funcs ###

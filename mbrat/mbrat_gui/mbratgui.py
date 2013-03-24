@@ -8,9 +8,11 @@ from gi.repository import Gtk #, Gdk
 
 from mbrat.configmgr import SecManager, ConfigManager
 from mbrat.mscreen import PyMScreen
-from mbrat.settings import MBRAT_GUID_GLADEF, MBRAT_TMPF, MBRAT_TMP_IMGF, MBRAT_GUI_CFGF, \
-    cmap_fun
-from mbrat.util import Arguments, mpoint_pick_random
+from mbrat.settings import MBRAT_TMPF, MBRAT_TMP_IMGF, MBRAT_CFG_TYPE_L, \
+    MBRAT_CFG_DEPTREE_D, MBRAT_GUID_GLADEF, MBRAT_USR_CFGF, MBRAT_GUI_DEPTREE_D, \
+    MBRAT_DEF_MPBACKEND, cmap_fun
+from mbrat.util import Arguments, clogger
+from mbrat.mbrat_gui.mscreentabs import POOL_TYPE_L, MScreenTabs
 
 
 class mbratgui:
@@ -24,7 +26,7 @@ class mbratgui:
         # MBrat ConfigManager instance
         self.cfgmgr = ConfigManager()
         self.sm = self.cfgmgr.secmgr
-        self.prefs = SecManager('gui', MBRAT_GUI_CFGF)
+        self.prefs = SecManager('prefs', MBRAT_USR_CFGF)
         self._init_ui()
 
 
@@ -32,108 +34,49 @@ class mbratgui:
 
     def _init_ui(self):
 
-        # TEMPORARARY handler dict until signal & gui class method names match...
-        handler_d = {
-            # top-level (window and menu) signals
-            "on_MainWindow_delete_event":        self.on_MainWindow_delete_event,
-            "on_quitMenuitem_activate":          self.on_MainWindow_delete_event,
-            "on_savePoolMenuitem_activate":      self.on_savePoolMenuitem_activate,
-            "on_prefsMenuitem_activate":         self.on_prefsMenuitem_activate,
-            "on_aboutMenuitem_activate":         self.on_aboutMenuitem_activate,
-            # viewscreen block
-            "on_mscreenNotebook_switch_page":    self.on_tab_switch,
-            "on_temppoolDrawingarea_draw":       self.on_temppoolDrawingarea_draw,
-            "on_pubpoolDrawingarea_draw":        self.on_pubpoolDrawingarea_draw,
-            "on_privpoolDrawingarea_draw":       self.on_privpoolDrawingarea_draw,
-            "on_showpointsToolbutton_toggled":   self.on_showpointsToolbutton_toggled,
-            # parameter control block 
-            "on_genMSetButton_clicked":          self.on_genMSetButton_pressed,
-            "on_saveToPoolButton_clicked":       self.on_saveToPoolButton_clicked,
-            # profile control block
-            "on_profilePoolCombobox_changed":    self.on_profileCombobox_changed,
-            "on_pickPoolButton_clicked":         self.on_pickPoolButton_pressed,
-            "on_pickPoolKeyButton_clicked":      self.on_pickPoolKeyButton_pressed,
-            "on_poolkeyPickerButton_clicked":    self.on_poolkeyPickerButton_clicked,
-            "on_profileNameCombobox_changed":    self.on_profileCombobox_changed,
-            "on_pickNameButton_clicked":         self.on_pickNameButton_pressed,
-            "on_profilePrivKeyCombobox_changed": self.on_profileCombobox_changed,
-            "on_pickPrivKeyButton_clicked":      self.on_pickPrivKeyButton_pressed,
-            "on_privkeyPickerButton_clicked":    self.on_privkeyPickerButton_clicked,
-            "on_addPubKeyButton_clicked":        self.on_addPubKeyButton_pressed,
-            }
-
+        # g/set & connect the Builder, & shortcut 'get_object' method ...
         self.builder = Gtk.Builder()
         self.builder.add_from_file( MBRAT_GUID_GLADEF )
-        self.builder.connect_signals( handler_d )
+        self.builder.connect_signals( self )
 
         self.go = self.builder.get_object
+
+        # ... g/set the windows incl Dialogs ... 
         self.window = self.go("MainWindow")
         self.saveasDialog = self.go("filechooserDialog")
         self.prefsDialog = self.go("prefsDialog")
         self.aboutDialog = self.go("aboutDialog")
 
+        # ... g/set & init the console Textview ...
         self.consoleView = self.go("MSetInfoTextview")
         self.consoleBuffer = self.consoleView.get_buffer()
         self.consoleView.set_buffer(self.consoleBuffer)
         self.consoleBuffer.set_text("")
         self.consoleBuffer.insert_at_cursor(self.cfgmgr.logstr())
 
-        self._init_image_tabs()
-        self._init_comboboxes()
-        self._init_state_to_prefs()
+        # ... g/set & init the profile block elts (Combobox, etc) ...
+        self._init_profileControl()
+
+        # ... init a state dict from prefs configf & current cfgmgr ...
+        self._init_state()
+
+        # ... instantiate & init the Notebook manager ...
+        self.tabs = MScreenTabs(self.builder)
+        self.tabs.set_state_callback(self._state)
+
+        # ... g/set & init the param block elts (Entry, etc) ...
         self._set_parameterGrid_values_to_pool('tmp')
 
+        # ... init state-dependent ui elts to initial state (forces redraw) ...
+        self._init_ui_to_state()
+
+        # ... show_off_my_fancy_gui()
         self.window.show_all()
-
-
-    # init misc UI elts to their preferred state and keep track during runtime
-
-    def _init_state_to_prefs(self):
-
-        pref_state = True if self.prefs.get('showpoints') == 'True' else False
-        self.state = {}
-        self.state['toolbar'] = { 
-            'showpoints': pref_state,
-            }
-        elt = self.go("showpointsToolbutton").set_active(pref_state)
-
-
-    # grab the DrawingAreas and init a dict to keep track of 'em & ImageSurfaces
-
-    def _init_image_tabs(self):
-
-        # da = DrawingArea, ims = ImageSurface
-        self.tab = {
-            'tmp':     { 'da': self.go("temppoolDrawingarea"), 'ims': None, },
-            'pool':    { 'da': self.go("pubpoolDrawingarea"),  'ims': None, },
-            'privkey': { 'da': self.go("privpoolDrawingarea"), 'ims': None, },
-            }
-
-
-    # read a PNG to ImageSurface obj, update (darea,surf) dict, and do queue_draw() 
-
-    def _load_image_tab(self, cfg_t='tmp'):
-
-        imgf = ""
-        if cfg_t == 'pool':
-            imgf = self.sm[cfg_t].get('image')
-        elif cfg_t == 'privkey':
-            imgf = self.sm[cfg_t].get_from_section('pool', 'image')
-        elif cfg_t == 'tmp':
-            imgf = MBRAT_TMP_IMGF
-
-        if imgf and path.exists(imgf):
-#            print imgf
-            self.tab[cfg_t]['ims'] = cairo.ImageSurface.create_from_png(imgf)
-            ims = self.tab[cfg_t]['ims']
-            darea = self.tab[cfg_t]['da']
-            darea.set_size_request( ims.get_width(), ims.get_height() )
-            darea.queue_draw()
 
 
     # grab the comboboxes from the profile section to update on tab switch
 
-    def _init_comboboxes(self):
+    def _init_profileControl(self):
 
         self.cbox = {
             'pool':    self.go("profilePoolCombobox"),
@@ -142,6 +85,42 @@ class mbratgui:
             'privkey': self.go("profilePrivKeyCombobox"),
             'pubkey':  self.go("profilePubKeyCombobox"),
             }
+
+
+    # init a state dict and set vals to preferred or current states
+
+    def _init_state(self):
+
+        self.state = {}
+
+        # init state properties from prefs configf ...
+        pref_state = True if self.prefs.get('showpoints') == 'True' else False
+        self.state.update( { 'showpoints': pref_state, } )
+
+        # ... init state props from current ConfigManager state
+        for cfg_t in self.sm.keys():
+            self.state[cfg_t] = self.sm[cfg_t]
+
+
+    # state mutator & callback method
+
+    def _state(self, key, value=None):
+
+        # setter routine 
+        if value != None:
+            self.state[key] = value
+        # getter routine
+        else:
+            return self.state[key]
+
+
+    # init misc UI elts to state
+
+    def _init_ui_to_state(self):
+
+        self.go("showpointsToolbutton").set_active( 
+                self._state('showpoints') 
+                )
         self._load_combobox()
 
 
@@ -149,15 +128,30 @@ class mbratgui:
 
     def _load_combobox(self, cfg_t=None):
 
-        for cfg_key in self.cbox.keys():
-
+        for cfg_key in MBRAT_CFG_TYPE_L:
             if not cfg_t or cfg_key in cfg_t:
-                cfg_store = Gtk.ListStore(str)
 
-                for cfg in self.cfgmgr.get_cfg_list(cfg_key):
+                # get the current cfg name and cfg list for this cfg_key
+                cur_cfgn = self._state(cfg_key).get('name')
+                if cur_cfgn != None:
+                    cur_cfgn = "{}.cfg".format(cur_cfgn) if cfg_key == 'pubkey' else cur_cfgn
+                cfg_l = self.cfgmgr.get_cfg_list(cfg_key)
+
+                # create the list model for the combobox
+                cfg_store = Gtk.ListStore(str)
+                for cfg in cfg_l:
                     cfg_store.append([cfg])
 
+                # set/replace combobox's model with the ListStore
                 self.cbox[cfg_key].set_model(cfg_store)
+                if cur_cfgn != None:
+                    self.cbox[cfg_key].set_active( cfg_l.index(cur_cfgn) )
+
+
+    # read a PNG to ImageSurface obj, update (darea,surf) dict, and do queue_draw() 
+
+    def _load_image_tab(self, pool_t='tmp'):
+        self.tabs.load_image_tab(pool_t)
 
 
     # grab user vals from 'parameter' control & parse to args for MScreen
@@ -167,6 +161,7 @@ class mbratgui:
         args = Arguments()
         args.iters = int(self.go("maxiterEntry").get_text())
         args.ppu = int(self.go("ppuEntry").get_text())
+        args.prec = int(self.go("precEntry").get_text())
         x_lo = args.x_lo = self.go("xLoEntry").get_text()    
         y_lo = args.y_lo = self.go("yLoEntry").get_text()    
         x_hi = args.x_hi = self.go("xHiEntry").get_text()    
@@ -198,37 +193,30 @@ class mbratgui:
 
     def _set_parameterGrid_values_to_pool(self, pool_t):
 
-        if pool_t == 'pool':
-            args = self.sm['pool'].get_as_args()
-        elif pool_t == 'privkey':
-            args = self.sm['privkey'].get_as_args('pool')
-        elif pool_t == 'tmp':
-            args = self.sm['tmp'].get_as_args('pool')
-
-        self._set_parameterGrid_values(vars(args))
+        if pool_t in POOL_TYPE_L:
+            sm = self._state(pool_t)
+            args = sm.get_as_args() if pool_t == 'pool' else sm.get_as_args('pool')
+            self._set_parameterGrid_values(vars(args))
 
 
     # switch control block & 'act type' to set dependent fields sensitive
 
-    def _set_children_sensitive(self, block, act_t):
+    def _set_children_sensitive(self, block, act_t, sensitive=True):
 
-        child_l = []
-        if block == 'param':
-            if act_t == 'tmp':
-                child_l = [ "saveToPoolButton", ]
-        elif block == 'profile':
+        cascade_l = [act_t,]
+        if not sensitive and block == 'profile':
             if act_t == 'pool':
-                child_l = [ "profilePoolKeyCombobox", "pickPoolKeyButton", ]
-            elif act_t == 'poolkey':
-                child_l = [ "poolkeyPickerButton", ]
+                cascade_l.append( 'poolkey' )
             elif act_t == 'profile':
-                child_l = [ "profilePrivKeyCombobox", "pickPrivKeyButton", ]
-            elif act_t == 'privkey':
-                child_l = [ "privkeyPickerButton", 
-                            "profilePubKeyCombobox", "addPubKeyButton", ]
+                cascade_l.append( 'privkey' )
 
-        for child in child_l:
-            self.go(child).set_sensitive(True)
+        for act in cascade_l:
+            child_l = MBRAT_GUI_DEPTREE_D[block][act]
+
+            for child in child_l:
+                cbox = self.go(child)
+                if cbox.get_sensitive() != sensitive:
+                    cbox.set_sensitive(sensitive)
 
 
     # little util method to format MScreen vars(args) for configBuffer
@@ -238,23 +226,7 @@ class mbratgui:
         ctxt = ""
         for prop, val in prop_d.iteritems():
             ctxt += "\t{0} = {1}\n".format(prop, val)
-
         return ctxt
-
-
-    # a general-ish method to refresh various ui elts
-
-    def _refresh_ui(self, block=None, act_l=[]):
-
-        pool_l = ['tmp', 'pool', 'privkey']
-        act_l = pool_l if not act_l else act_l
-        
-        self._load_combobox()
-        for act_t in act_l:
-            if block:
-                self._set_children_sensitive(block, act_t)
-            if act_t in pool_l:
-                self._load_image_tab(act_t)
 
 
     # save params from control block and img to a given pool
@@ -262,8 +234,9 @@ class mbratgui:
     def _save_param_to_pool(self, cfg_t, cfgname):
 
         ctxt = "==> SAVE to '{}':\n".format(cfgname)
-        args = self.sm['tmp'].get_as_args('pool')
-        prop_d = vars(args)
+
+        tmp_sm = self._state('tmp')
+        prop_d = vars( tmp_sm.get_as_args('pool') )
 
         if 'name' in prop_d.keys():
             del prop_d['name']
@@ -271,29 +244,17 @@ class mbratgui:
         if 'lims' in prop_d.keys():
             del prop_d['lims']
 
-        # if it's bound for the current PUBLIC pool...
-        if cfg_t == 'pool':
-            imgf = self.sm[cfg_t].get('image')
+        if cfg_t in ['pool', 'privkey']:
+            sm = self._state(cfg_t)
+            imgf = sm.get_from_section('pool', 'image')
 
             if not imgf:
-                poold = self.sm[cfg_t].rootd
-                imgf = "{}.png".format(self.sm[cfg_t].get('name'))
+                poold = sm.rootd
+                imgf = "{}.png".format(sm.get_from_section('pool', 'name'))
                 imgf = path.join( poold, imgf )
 
             prop_d['image'] = imgf
-            self.sm[cfg_t].set_write(prop_d)
-
-        # ... or the current PRIVATE pool
-        elif cfg_t == 'privkey':
-            imgf = self.sm[cfg_t].get_from_section('pool', 'image')
-
-            if not imgf:
-                poold = self.sm[cfg_t].rootd
-                imgf = "{}.png".format( self.sm[cfg_t].get_from_section('pool', 'name') )
-                imgf = path.join( poold, imgf )
-
-            prop_d['image'] = imgf
-            self.sm[cfg_t].set_write_to_section('pool', prop_d)
+            sm.set_write_to_section('pool', prop_d)
 
         # copy tmp img to pool's dir
         shutil.copy(MBRAT_TMP_IMGF, imgf)
@@ -311,6 +272,21 @@ class mbratgui:
         return ctxt
 
 
+    # a general-ish method to refresh various ui elts
+
+    def _refresh_ui(self, block=None, act_l=[]):
+
+        act_l = POOL_TYPE_L if not act_l else act_l
+
+        for act_t in act_l:
+            if block:
+                self._set_children_sensitive(block, act_t, sensitive=True)
+            if act_t in POOL_TYPE_L:
+                self._load_image_tab(act_t)
+
+        self._load_combobox()
+
+
     ##### PUBLIC HANDLERS SECTION ######################
 
     # handler methods for 'top-level' objects and events
@@ -322,6 +298,10 @@ class mbratgui:
             if path.exists(MBRAT_TMPF):
                 os.remove(MBRAT_TMPF)
         Gtk.main_quit(args)
+
+
+    def on_quitMenuitem_activate(self, menuitem):
+        self.on_MainWindow_delete_event()
 
 
     def on_savePoolMenuitem_activate(self, menuitem):
@@ -346,10 +326,13 @@ class mbratgui:
     def on_prefsMenuitem_activate(self, menuitem):
         """ Handler for 'Edit Preferences' menu item Dialog. """
 
+        # save temp pool config between sessions?
         savetemp_pref = self.go("prefsSavetempCheckbutton")
         savetemp_pref.set_active( self.prefs.get('savetemp') == 'True' )
+        # show all key-points in pool image views by default?
         showpts_pref = self.go("prefsShowpointsCheckbutton")
         showpts_pref.set_active( self.prefs.get('showpoints') == 'True' )
+        # log to terminal stdout instead of gui console?
         lts_pref = self.go("prefsLtsCheckbutton")
         lts_pref.set_active( self.prefs.get('lts') == 'True' )
 
@@ -357,10 +340,16 @@ class mbratgui:
         self.prefsDialog.hide()
 
         if response == Gtk.ResponseType.APPLY:
+            # multiprecision python backend (mpmath or BigFloat) to use
+            mpbe_pref = self.go("prefsMPBackendCombobox").get_active_text()
+            mpbe_pref = MBRAT_DEF_MPBACKEND if mpbe_pref == None else mpbe_pref 
+            
+            # write prefs to usr.cfg
             self.prefs.set_write( {
                     'savetemp': savetemp_pref.get_active(),
                     'showpoints': showpts_pref.get_active(), 
                     'lts': lts_pref.get_active(),
+                    'mpbackend': mpbe_pref,
                     } )
 
 
@@ -373,71 +362,40 @@ class mbratgui:
 
     # handlers for DrawingArea, surface, tabs, and Toolbutton signals
 
-    def on_tab_switch(self, notebook, page, page_num):
+    def on_mscreenNotebook_switch_page(self, notebook, page, page_num):
         """ Handler for when a Notebook Page (tab) is switched. """
 
-        pool_l = ['tmp', 'pool', 'privkey']
-        pool_t = pool_l[page_num]
+        pool_t = POOL_TYPE_L[page_num]
         self._set_parameterGrid_values_to_pool(pool_t)
-
-
-    def on_draw(self, pool_t, darea, cr):
-        """ Draw method for any given DrawingArea and target tab ('pool type'). """
-
-        cr.set_source_surface( self.tab[pool_t]['ims'], 0, 0 )
-        cr.paint()
-        
-    # handlers for 'on_draw' cases for each tab...
-
-    def on_temppoolDrawingarea_draw(self, darea, cr):
-        self.tab['tmp']['da'] = darea
-        if self.tab['tmp']['ims']:
-            self.on_draw('tmp', darea, cr)
-
-
-    def on_pubpoolDrawingarea_draw(self, darea, cr):
-        self.tab['pool']['da'] = darea
-        if self.tab['pool']['ims']:
-
-            if self.state['toolbar']['showpoints']:
-                self._draw_layer_in_tab('pool')
-
-            self.on_draw('pool', darea, cr)
-
-
-    def on_privpoolDrawingarea_draw(self, darea, cr):
-        self.tab['privkey']['da'] = darea
-        if self.tab['privkey']['ims']:
-
-            if self.state['toolbar']['showpoints']:
-                self._draw_layer_in_tab('privkey')
-
-            self.on_draw('privkey', darea, cr)
 
 
     def on_showpointsToolbutton_toggled(self, button):
         """ Handler for the 'show points' Toolbutton. """
 
-        self.state['toolbar']['showpoints'] = button.get_active()
-        self._refresh_ui( act_l=['tmp', 'pool', 'privkey'] )
+        self._state( 'showpoints', button.get_active() )
+        self._refresh_ui()
+
+        
+    # handlers for 'on_draw' cases for each tab...
+
+    def on_tmpDrawingarea_draw(self, darea, cr):
+        self.tabs.on_tmpTab_draw(darea, cr)
+
+    def on_poolDrawingarea_draw(self, darea, cr):
+        self.tabs.on_poolTab_draw(darea, cr)
+
+    def on_privkeyDrawingarea_draw(self, darea, cr):
+        self.tabs.on_privkeyTab_draw(darea, cr)
 
 
     # handlers for the 'parameter control block'
 
-    def on_genMSetButton_pressed(self, button):
+    def on_genMSetButton_clicked(self, button):
         """ Method for when 'Generate Mandelbrot Set' button is pressed. """
 
         args = self._parse_parameterGrid_values()
-        # new MScreen from ui param block
-        self.mscreen = PyMScreen(args)
-        self.mscreen.gen_mscreen()
-        self.mscreen.gen_mset()
-        ctxt = "{}\n".format(self.mscreen.get_info())
-
-        # make png from mscreen and save to tmp
-        img = self.mscreen.get_img()
-        png_img = png.from_array( img, 'L' )
-        png_img.save( MBRAT_TMP_IMGF )
+        args.imgf = MBRAT_TMP_IMGF
+        ctxt = self.tabs.gen_mset_to_png('tmp', args)
 
         # update the SecManager
         del args.lims
@@ -454,6 +412,7 @@ class mbratgui:
 
         pool_txt = self.go("saveToPoolCombobox").get_active_text()
         ctxt = "Saving Mandelbrot set to current {} ...\n".format(pool_txt)
+
         cfg_t = 'pool' if 'Public' in pool_txt else 'privkey'
         cfg_iter = self.cbox[cfg_t].get_active_iter()
 
@@ -483,9 +442,12 @@ class mbratgui:
         ctxt = ""
         cfg_iter = self.cbox[cfg_t].get_active_iter()
 
+        # cfg_iter points to user choice? ...
         if cfg_iter != None:
             model = self.cbox[cfg_t].get_model()
             cfgname = model[cfg_iter][0]
+
+        # ... or to an Entry?
         else:
             cfgname = self.cbox[cfg_t].get_child().get_text()
 
@@ -494,6 +456,7 @@ class mbratgui:
                 self.consoleBuffer.insert_at_cursor(ctxt)
                 return
 
+            # are we making a new config?
             if cfgname not in self.cfgmgr.get_cfg_list(cfg_t):
                 ctxt += "Making new {0} '{1}' ...\n".format(cfg_t, cfgname)
 
@@ -507,97 +470,66 @@ class mbratgui:
 
         ctxt += "Activating {0} '{1}' ... ".format(cfg_t, cfgname)
 
+        # update ConfigManager and cfg state
         if self.cfgmgr.set_current_cfg_by_name(cfg_t, cfgname):
-            self.sm[cfg_t].set_configf_by_name(cfgname)
-            self.sm[cfg_t].read()
             ctxt += "{0} '{1}' activated.\n".format(cfg_t, cfgname)
             ctxt += "==> INFO: {}\n".format( self.sm[cfg_t].get('info') )
-            self._refresh_ui( block='profile', act_l=[cfg_t,] )
         else:
             ctxt += "\n==> ERROR: could not activate {0} '{1}'\n".format(cfg_t, cfgname)
 
         self.consoleBuffer.insert_at_cursor(ctxt)
 
+        self._refresh_ui( block='profile', act_l=[cfg_t,] )
+
 
     # dummy handlers redirect to pickConfigButton...
 
-    def on_pickPoolButton_pressed(self, button):
+    def on_pickPoolButton_clicked(self, button):
         self.on_pickConfigButton( 'pool', button )
 
-    def on_pickPoolKeyButton_pressed(self, button):
+    def on_pickPoolKeyButton_clicked(self, button):
         self.on_pickConfigButton( 'poolkey', button )
 
-    def on_pickNameButton_pressed(self, button):
+    def on_pickNameButton_clicked(self, button):
         self.on_pickConfigButton( 'profile', button )
 
-    def on_pickPrivKeyButton_pressed(self, button):
+    def on_pickPrivKeyButton_clicked(self, button):
         self.on_pickConfigButton( 'privkey', button )
 
-    def on_addPubKeyButton_pressed(self, button):
+    def on_addPubKeyButton_clicked(self, button):
         self.on_pickConfigButton( 'pubkey', button )
 
 
-    # handlers for when 'parent' comboboxes are changed...
+    # handler stubs for when 'parent' comboboxes are changed (pass for now)...
 
-    def on_profileCombobox_changed(self, widget):
-        self._refresh_ui()
+    def on_profilePoolCombobox_changed(self, widget):
+        pass
+
+    def on_profileNameCombobox_changed(self, widget):
+        pass
+
+    def on_profilePrivKeyCombobox_changed(self, widget):
+        pass
 
 
     # RANDOM point-picker handlers rely on extern method...
 
+    def on_pointPickerButton(self, key_t, button):
+        """ Pick a RANDOM key-point from the appropriate pool. """
+
+        result = self.tabs.pick_mpoint( 'random', key_t, 
+                                        self.cfgmgr, self.prefs.get('lts') )
+
+        ctxt = result.log if not result.err else result.err        
+
+        if ctxt != None:
+            self.consoleBuffer.insert_at_cursor(ctxt)
+
+        self._refresh_ui()
+
+
     def on_poolkeyPickerButton_clicked(self, button):
-        """ Pick a RANDOM key-point from the PUBLIC pool. """
-
-        result = mpoint_pick_random( self.cfgmgr, 'poolkey', self.prefs.get('lts') )
-        ctxt = result.log if not result.err else result.err
-        
-        self._refresh_ui( act_l=['pool'] )
-        self.consoleBuffer.insert_at_cursor(ctxt)
-
-        print result.mpoint.Get_ix(), " ", result.mpoint.Get_iy()
-
+        self.on_pointPickerButton('poolkey', button)
         
     def on_privkeyPickerButton_clicked(self, button):
-        """ Pick a RANDOM key-point from the PRIVATE pool. """
-
-        result = mpoint_pick_random(self.cfgmgr, 'privkey', self.prefs.get('lts') )
-        ctxt = result.log if not result.err else result.err
-
-        self._refresh_ui( act_l=['privkey'] )
-        self.consoleBuffer.insert_at_cursor(ctxt)
-
-        print result.mpoint.Get_ix(), " ", result.mpoint.Get_iy()
-
-
-    # Additional draw methods
-
-    def _draw_layer_in_tab(self, pool_t):
-        """ Draws on ImageSurface using Cairo derived Context. """
-
-        if pool_t in ['pool', 'privkey']:
-            ppu = int( self.sm[pool_t].get_from_section('pool', 'ppu') )
-            x_lo = float( self.sm[pool_t].get_from_section('pool', 'x_lo') )
-            y_hi = float( self.sm[pool_t].get_from_section('pool', 'y_hi') )
-
-            key_cfg = self.sm['poolkey'] if pool_t == 'pool' else self.sm['privkey']
-            self.sm[pool_t].reset_section()
-            
-            x = float( key_cfg.get('real') )
-            y = float( key_cfg.get('imag') )
-        
-            ix = ppu*(x - x_lo) - 0.5
-            iy = 0.5 - ppu*(y - y_hi)
-
-#            print ix, " ", iy
-            self._draw_point(pool_t, (ix, iy), 5)
-
-
-    def _draw_point(self, pool_t, ptix, pxrad):
-        
-        cr = cairo.Context( self.tab[pool_t]['ims'] )
-
-        cr.set_source_rgb(1.0, 0.0, 0.0)
-        cr.translate(ptix[0], ptix[1])
-        cr.arc(0, 0, pxrad, 0, 2*pi)
-#        cr.rectangle(ptix[0], ptix[1], pxrad, pxrad)
-        cr.fill()
+        self.on_pointPickerButton('privkey', button)

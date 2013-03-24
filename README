@@ -1,8 +1,20 @@
-.================================================================.
-| MBrat - A Mandelbrot Set-based crypto explorer suite           |
-|================================================================|
-| With toys and tools written in Python, C, and yes, even Matlab |
-'----------------------------------------------------------------'
+MandelBrat - Mandelbrot Set-based crypto explorer
 
-  * Joseph Edwards VIII <coriolisjoh@msn.com>
-    joseph8th@urcomics.com:webapps/privgit/mbrat.git
+VERSION: 0.1g [Git-dev]
+
+USAGES:
+        $ mbrat gui
+        $ mbrat -h
+
+DESCRIPTION:
+
+    This version is not fully functional. The cryptographic algorithms are not implemented here.
+These are being developed with their own interfaces, so they may be implemented via other crypto
+packages as well (i.e., openssl, /dev/crypto, JavaSec SPIs, etc).
+
+Expect these features starting with v1.0. 
+
+AUTHOR:
+        Joseph Edwards VIII
+        www.urcomics.com/git
+        joseph8th@urcomics.com

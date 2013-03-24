@@ -1,10 +1,12 @@
 import os
 from os import path
 from shutil import rmtree
+from mpmath import mp, mpc, nstr
+from mpmath import mpmathify as mpify
 
 from mbrat.commander import ConfigCommand
 from mbrat.mscreen import PyMScreen
-from mbrat.util import pyMFun
+from mbrat.util import arglist_parse_to_dict, pyMFun
 
 
 class PrivKeyCommand(ConfigCommand):
@@ -16,6 +18,8 @@ class PrivKeyCommand(ConfigCommand):
         super(PrivKeyCommand, self).__init__()
         self.group.add_argument( "--vipool", action='store_true',
                                  help="view info about private pool for current privkey" )
+        self.group.add_argument( "--setpool", nargs='*',
+                                 help="set private pool config properties" )
         self.group.add_argument( "--pkrand", action='store_true',
                                  help="pick a random private key-point from private pool" )
         self.group.add_argument( "--lspub", action='store_true',
@@ -33,6 +37,8 @@ class PrivKeyCommand(ConfigCommand):
             self.run_rm(args)
         elif args.vipool:
             self.run_vipool(args)
+        elif args.setpool:
+            self.run_setpool(args)
         elif args.pkrand:
             self.run_pkrand(args)
         elif args.lspub:
@@ -51,6 +57,13 @@ class PrivKeyCommand(ConfigCommand):
         self.run_vi(args)
 
 
+    def run_setpool(self, args):
+        self.config.set_section_to('pool')
+        self.name = self.config.get('name')
+        args.set = args.setpool
+        self.run_set(args)
+
+
     def run_lspub(self, args):
         self.name = 'privpub'
         self.run_ls(args)
@@ -67,6 +80,9 @@ class PrivKeyCommand(ConfigCommand):
 
 
     def run_genpub(self, args):
+
+        print "Generating data for pubkey '{}' ...".format(args.genpub)
+
         # get the necessary configs
         pool_cfg = self.cfgmgr.secmgr['pool']
         pubkey_cfg = self.cfgmgr.secmgr['pubkey']
@@ -78,39 +94,59 @@ class PrivKeyCommand(ConfigCommand):
         try:
             os.mkdir(pubkeyd)
         except OSError:
-            exit( "==> ERROR: pubkey '{}' already exists.".format(args.genpub) )
+            print "==> Modifying '{}' ...".format(args.genpub)
 
         # set up the necessary values and types
-        poolkey = complex( float(poolkey_cfg.get('real')),
-                           float(poolkey_cfg.get('imag')) )
-        privkey = complex( float(self.config.get('real')), 
-                           float(self.config.get('imag')) )
+        priv_prop_l = arglist_parse_to_dict( self.config.items() ).keys()
+        if 'prec' in priv_prop_l:
+            dps = int( self.config.get('prec') )
+            mp.dps = dps
+        else:
+            dps = mp.dps
+
+        poolkey = mpc( real = mpify(poolkey_cfg.get('real')),
+                       imag = mpify(poolkey_cfg.get('imag')) )
+        privkey = mpc( real = mpify(self.config.get('real')),
+                       imag = mpify(self.config.get('imag')) )
+
         pooliters = int( pool_cfg.get('iters') )
         priviters = pooliters + int( self.config.get_from_section('pool', 'iters') )
 
         # generate the pubkey, make property dict, write_set to new config file...
         pubkey = pyMFun( poolkey, poolkey, privkey, priviters )
+
         prop_d = { 
             'pubkey': {
                 'name': args.genpub, 
-                'info': "Made with PrivKey '{0}' and PoolKey '{1}'".format(
+                'info': "Using PrivKey '{0}' and PoolKey '{1}'".format(
                     self.config.get('name'), poolkey_cfg.get('name') ),
-                'real': pubkey.real, 'imag': pubkey.imag, 
+                'real': nstr( pubkey.real, dps ), 
+                'imag': nstr( pubkey.imag, dps ), 
                 },
             'poolkey': {
                 'name': poolkey_cfg.get('name'),
                 'pool': pool_cfg.get('name'),
                 },
+            'privkey': {
+                'real': nstr( privkey.real, dps ),
+                'imag': nstr( privkey.imag, dps ),
+                'prec': dps,
+                },
             }
         pubkey_cfg.set_write_configf( pubkeyf, prop_d['pubkey'] )
         pubkey_cfg.set_write_to_section( 'poolkey', prop_d['poolkey'] ) 
+        self.config.set_write( prop_d['privkey'] )
 
         # output the results
-        print "Generating unpublished pubkey '{}' to".format(args.genpub)
-        print "--> {} ...\n".format(pubkeyf)
-        print "\tPoolKey =", poolkey, "\n\tPrivKey =", privkey
-        print "\tPrivate Max. Iterations = {}".format(priviters)
-        print "\n==> PubKey = [", pubkey, ", {} ]".format(pooliters)
+        print "==> Wrote to pubkey '{}' at".format(args.genpub)
+        print "  -> {}".format(pubkeyf)
+        print "==> Parameters used:\n  -> PoolKey =", poolkey, \
+            "\n  -> PrivKey =", privkey
+        print "  -> Private Max. Iterations = {}".format(priviters)
+        print "  -> Private Precision = {}".format(dps)
+        print "==> PubKey generated (n,E):", \
+            "\n  -> n = {}".format(pooliters), \
+            "\n  -> E =", pubkey
         
 
 

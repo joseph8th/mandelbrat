@@ -5,7 +5,7 @@ import ConfigParser
 from mbrat.util import Arguments, arglist_parse_to_dict
 from mbrat.settings import MBRAT_POOLSD, MBRAT_PROFILESD, MBRAT_CURRENTL, \
     MBRAT_DEF_POOL_D, MBRAT_DEF_POOLKEY_D, MBRAT_DEF_PRIVKEY_D, \
-    MBRAT_TMPD, MBRAT_TMPF
+    MBRAT_TMPD, MBRAT_TMPF, MBRAT_CFG_TYPE_L, MBRAT_CFG_DEPTREE_D
 
 
 class SecManager(object):
@@ -74,6 +74,8 @@ class SecManager(object):
         self.config.read(self.configf)
 
     def get_from_section(self, section, key):
+        if not path.exists(self.configf):
+            return None
         self.read()
         return self.config.get( section, key )
 
@@ -141,7 +143,9 @@ class ConfigManager(object):
                 self._log("==> Activated profile '{}'".format(profilename) )
         self.profile_cfg = self.get_current_cfg('profile')
 
+
     def _init_section_managers(self, profilename=None):
+
         self._init_profile(profilename)
         self.secmgr = {
             'profile': SecManager('profile', self.profile_cfg),
@@ -151,6 +155,13 @@ class ConfigManager(object):
             'pubkey': SecManager('pubkey', self.get_current_cfg('pubkey')),
             'tmp': SecManager('tmp', MBRAT_TMPF),
             }
+
+    def _update_section_managers(self):
+        
+        for cfg_t in MBRAT_CFG_TYPE_L:
+            self.secmgr[cfg_t].set_configf( self.get_current_cfg(cfg_t) )
+            self.secmgr[cfg_t].read()
+
 
     def _err(self, msg):
         self.err += "{}\n".format(msg)
@@ -183,18 +194,24 @@ class ConfigManager(object):
             pass
         os.symlink( configf, current_cfg )
         # re-initialize the SecManager dict
-        self._init_section_managers()
+        self._update_section_managers()
 
 
     def set_current_cfg_by_name(self, cfg_t, cfgname):
         """
-        Set '_current' configf by top-section and name. Uses SecManager methods. """
+        Set '_current' configf by top-section and name. Uses SecManager methods. 
+        Cascades dependencies to set correct current config in 'child' SecManager(s).
+        For example: set 'profile' -> set ['privkey', 'pubkey'] 
 
+        """
+
+        # this part updates the approp. SecManager(s)
         if not self.secmgr[cfg_t].set_configf_by_name(cfgname):
             return False
-        targetd = self.secmgr[cfg_t].parentd
-        configf = self.secmgr[cfg_t].configf
-        self.set_current_cfg( targetd, configf )
+        self.secmgr[cfg_t].read()
+
+        self.set_current_cfg( self.secmgr[cfg_t].parentd, 
+                              self.secmgr[cfg_t].configf )
         return True
 
 
@@ -228,6 +245,7 @@ class ConfigManager(object):
     def get_cfg_list(self, cfg_t):
         parentd = self.get_cfg_parentd(cfg_t)
         return [ p for p in os.listdir(parentd) if not '_' in p[0] ]
+
 
     def get_cfg_parentd(self, cfg_t):
         if cfg_t == 'pool':
@@ -334,7 +352,8 @@ class ConfigManager(object):
 
         elif cfg_t == 'profile':
             prop_d = { cfg_t: {'info': "", 'name': cfgname,}, }
-            args = self._mkcfg_args( cfgname, MBRAT_PROFILESD, ['data', 'public',], prop_d )
+            args = self._mkcfg_args( cfgname, MBRAT_PROFILESD, 
+                                     ['data', 'public',], prop_d )
 
         elif cfg_t == 'privkey':
             targetd = self.get_cfg_parentd(cfg_t)

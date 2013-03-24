@@ -1,4 +1,8 @@
+import os
 from os import path
+import subprocess
+#from mpmath import mp, mpc, fmul
+
 from mbrat.mscreen import PyMScreen
 
 class Arguments(object):
@@ -33,18 +37,12 @@ def arglist_parse_to_dict(arg_l):
 # mandelbrot set generic functions (too useful to be methods)
 
 def pyMFun(c, z0, e, n):
-    z = z0
+    z = mpc(z0)
+    
     while n > 0:
-        z = z*e*(c*c)
+        z = fmul(z, fmul(e, fmul(c, c)))
         n -= 1
     return z
-
-
-def clogger(logstr, log_to_stdout=False):
-    if log_to_stdout:
-        print logstr
-        logstr = ""
-    return "{}\n".format(logstr)
 
 
 def mpoint_pick_random(self, key_t, lts=False):
@@ -110,6 +108,45 @@ def mpoint_pick_random(self, key_t, lts=False):
     # update current *key config file
     self.secmgr[key_t].reset_section()
     self.secmgr[key_t].set_write( {'real': pt.real, 'imag': pt.imag,
+                                   'ix': pt.Get_ix(), 'iy': pt.Get_iy(),
                                    'info': "Randomly selected key-point.",} )
+    self.secmgr[key_t].read()
 
     return Arguments( {'log': logstr, 'err': errstr, 'mpoint': pt} )
+
+
+# general generic functions (too general to be methods)
+
+def clogger(logstr, log_to_stdout=False):
+    if log_to_stdout:
+        print logstr
+        logstr = ""
+    return "{}\n".format(logstr)
+
+
+def execSubproc(exelist, envdict=None, shell=True):
+    # change environ of subprocess if nec.
+    env = os.environ.copy()
+    if envdict:
+        for var, val in envdict.iteritems():
+            env[var] = val
+
+    # execute each command in the given list
+    for exe in exelist:
+        if shell:
+            exe = " ".join(exe)
+        print "==> Executing command '{}' ...".format(exe)
+        subproc = subprocess.Popen(exe, env=env, shell=shell,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        pout, perr = subproc.communicate()
+        if pout:
+            print pout
+        if perr:
+            print perr
+            return False
+        print "==> Execution complete."
+
+    # all done executing commands? ok...
+    return True
+
+
