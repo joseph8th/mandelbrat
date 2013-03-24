@@ -7,7 +7,7 @@ MBrat core settings
 """
 
 MBRAT_PROG = 'mbrat'
-MBRAT_VER = '0.1f'
+MBRAT_VER = '0.1g'
 
 MBRAT_ROOT = os.getcwd()
 
