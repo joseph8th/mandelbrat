@@ -1,0 +1,9 @@
+[pubkey]
+name = skelpubkey
+info = Empty Skeleton Public Key. Use 'privkey --mkpub' to generate data.
+real = 
+imag = 
+
+[poolkey]
+name = skelpoolkey
+pool = skelpool

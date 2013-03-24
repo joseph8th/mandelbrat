@@ -1,0 +1,6 @@
+[gui]
+savetemp = True
+showpoints = True
+lts = True
+mpbackend = mpmath
+

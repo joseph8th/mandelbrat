@@ -1,0 +1,20 @@
+[privkey]
+name = skelkey
+info = Randomly selected key-point.
+real = -0.140625000000000
+imag = 2.192708333333332
+prec = 60
+ix = 202
+iy = 90
+
+[pool]
+name = skelkey_pool
+iters = 100
+x_lo = -2.25
+y_lo = -1.25
+x_hi = 1.0
+y_hi = 1.25
+ppu = 96
+cmap = bw
+image = /home/notroot/Dev/python/mbrat/usr/profiles/skel/data/skelkey/skelkey_pool.png
+
