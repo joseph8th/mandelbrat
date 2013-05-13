@@ -71,7 +71,7 @@ class MScreenTabs(object):
 
         # make png from mscreen and save to tmp
         png_img = png.from_array( ms.get_img(), 'L' )
-        png_img.save( args.imgf )
+        png_img.save( args.image )
 
         return clogger( ms.get_info() )
 

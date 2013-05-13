@@ -1,7 +1,7 @@
 import png
 import random
 from os import path
-from bigfloat import BigFloat, add, sub, div, floor, precision
+#from bigfloat import BigFloat, add, sub, div, floor, precision
 
 from mbrat.settings import cmap_fun, MBRAT_DEF_PRECISION
 from mbrat.lib.mpoint import MPoint
@@ -10,15 +10,14 @@ from mbrat.lib.mpoint import MPoint
 class PyMScreen(object):
     """
     Class to encapsulate set-rendering matrix, handle mpoint objects,
-    and generate image objects to spec. Implements GNU MPFR via the
-    Bigfloat library, or generates a Mandelbrot set using Python floats.
+    and generate image objects to spec.
 
     """
 
     def __init__(self, args=None):
         if args != None:
             self._init_from(args)
-
+ 
 
     def _init_from(self, args):
 
@@ -48,10 +47,10 @@ class PyMScreen(object):
         l = self.limits
 
         self.ppu = int(args.ppu)
-        self.width = sub( l['high'].real, l['low'].real )
-        self.height = sub( l['high'].imag, l['low'].imag )
-        self.px_width = floor(self.width * self.ppu)
-        self.px_height = floor(self.height * self.ppu)
+        self.width = l['high'].real - l['low'].real
+        self.height = l['high'].imag - l['low'].imag
+        self.px_width = int(self.width * self.ppu)
+        self.px_height = int(self.height * self.ppu)
         self.iters = int(args.iters)
         self.cmap = cmap_fun(args.cmap)
         self.screen = None
@@ -68,13 +67,13 @@ class PyMScreen(object):
         Generate a set-rendering matrix set to the current instance properties. """
 
 #        with precision(self.prec):
-        d = 1.0/self.ppu
+        d = float(1.0/self.ppu)
         rows = []
         for iy in range(self.px_height):
             rows.append([])
             for ix in range(self.px_width):
                 x = self.limits['low'].real + d*(0.5 + ix)
-                y = self.limits['high'].imag + d*(0.5 + iy)
+                y = self.limits['high'].imag - d*(0.5 + iy)
                 rows[iy].append( MPoint(x, y, int(self.prec/3.333)) )
                 rows[iy][ix].Set_Index(ix, iy)
 

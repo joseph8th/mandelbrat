@@ -185,10 +185,10 @@ void MPoint :: Run_MFun(unsigned long itermax, ldcomplex z0) {
   long double zz;
   ldcomplex z = z0;
   long unsigned i = 0;
-  //  ldcomplex c_ld = this->c;
+  ldcomplex c_ld = this->c;
 
   while(i<itermax) {
-    z = z*z + this->c;
+    z = z*z + c_ld;
     zz = (z.real()*z.real()) + (z.imag()*z.imag());
     if (zz>4.0) break;
     ++i;

@@ -1,9 +1,9 @@
-import os
-from os import path
-import subprocess
+#import os
+#import sys
+#from os import path
+#import subprocess
 #from mpmath import mp, mpc, fmul
-
-from mbrat.mscreen import PyMScreen
+#from mbrat.mscreen import PyMScreen
 
 class Arguments(object):
     """
@@ -31,18 +31,91 @@ def arglist_parse_to_dict(arg_l):
         if not len(prop_l) == 2:
             exit( "==> ERROR: invalid config. Use one '=' per setting." )
         prop_d[prop_l[0]] = prop_l[1]
+
     return prop_d
 
 
 # mandelbrot set generic functions (too useful to be methods)
 
 def pyMFun(c, z0, e, n):
-    z = mpc(z0)
-    
+    """ 
+    Function used to compute multi-privkey key types (pubkey, seckey). """
+
+    from mpmath import mp, mpc, fmul
+
+    z = mpc(z0)    
+
     while n > 0:
         z = fmul(z, fmul(e, fmul(c, c)))
         n -= 1
+
     return z
+
+
+# general generic functions (too general to be methods)
+
+def clogger(logstr, lts=False, err=False):
+    """ 
+    Function to route log to stdout, GUI console. """
+
+    from sys import stderr
+
+    # lts = log_to_stdout
+    if lts:
+        if not err:
+            print logstr
+        else:
+            stderr.write(logstr)
+        logstr = ""
+
+    return logstr
+
+
+def mb_mkdirs(target):
+    """
+    Function to make directories or error back. """
+
+    from os import makedirs, error
+    try:
+        makedirs(target, 0755)
+    except error as e:
+        print "==> ERROR: ({0}): {1}".format(e.errno, e.strerror)
+        return False
+    else:
+        return True
+
+
+
+def execSubproc(exelist, envdict=None, shell=True):
+    """ 
+    Function to execute commands in various ways. """
+
+    from os import environ, path
+    import subprocess
+
+    # change environ of subprocess if nec.
+    env = environ.copy()
+    if envdict:
+        for var, val in envdict.iteritems():
+            env[var] = val
+
+    # execute each command in the given list
+    for exe in exelist:
+        if shell:
+            exe = " ".join(exe)
+        print "==> Executing command '{}' ...".format(exe)
+        subproc = subprocess.Popen(exe, env=env, shell=shell,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        pout, perr = subproc.communicate()
+        if pout:
+            print pout
+        if perr:
+            print perr
+            return False
+        print "==> Execution complete."
+
+    # all done executing commands? ok...
+    return True
 
 
 def mpoint_pick_random(self, key_t, lts=False):
@@ -56,6 +129,9 @@ def mpoint_pick_random(self, key_t, lts=False):
     
     """
  
+    from os import path
+    from mbrat.mscreen import PyMScreen
+
     errstr = ""
     logstr = clogger( "\nPicking a random {} key-point ...".format(key_t), lts )
 
@@ -113,40 +189,4 @@ def mpoint_pick_random(self, key_t, lts=False):
     self.secmgr[key_t].read()
 
     return Arguments( {'log': logstr, 'err': errstr, 'mpoint': pt} )
-
-
-# general generic functions (too general to be methods)
-
-def clogger(logstr, log_to_stdout=False):
-    if log_to_stdout:
-        print logstr
-        logstr = ""
-    return "{}\n".format(logstr)
-
-
-def execSubproc(exelist, envdict=None, shell=True):
-    # change environ of subprocess if nec.
-    env = os.environ.copy()
-    if envdict:
-        for var, val in envdict.iteritems():
-            env[var] = val
-
-    # execute each command in the given list
-    for exe in exelist:
-        if shell:
-            exe = " ".join(exe)
-        print "==> Executing command '{}' ...".format(exe)
-        subproc = subprocess.Popen(exe, env=env, shell=shell,
-                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        pout, perr = subproc.communicate()
-        if pout:
-            print pout
-        if perr:
-            print perr
-            return False
-        print "==> Execution complete."
-
-    # all done executing commands? ok...
-    return True
-
 

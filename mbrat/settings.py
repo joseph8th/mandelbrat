@@ -1,26 +1,53 @@
 import os
 from os import path
 
+
 """
 MBrat core settings
 
 """
 
 MBRAT_PROG = 'mbrat'
-MBRAT_VER = '0.1g'
+MBRAT_VER = '0.1h'
 
 MBRAT_ROOT = os.getcwd()
+MBRAT_CONFD = path.join(os.environ['HOME'], ".{}".format(MBRAT_PROG))
+MBRAT_HOME = MBRAT_ROOT
+#MBRAT_ROOT if not path.exists(MBRAT_CONFD) else MBRAT_CONFD
 
+# command executable script in /usr/local/bin
+def _get_bin():
+    bindir = '/usr/local/bin'
+    path_l = (os.getenv('PATH')).split(':')
+    if bindir in path_l:
+        return bindir
+    else:
+        return '/usr/bin'
+
+MBRAT_BIND = _get_bin()
+MBRAT_CMDF = path.join(MBRAT_BIND, MBRAT_PROG)
+
+# needed during installation to $HOME but will work for standalone clone too
 MBRAT_LIB_SRCD = path.join(MBRAT_ROOT, 'src')
 MBRAT_LIB_OBJN_L = ['mpoint',]
 MBRAT_LIB_OBJEXT = 'so'
 
-MBRAT_PYD = path.join(MBRAT_ROOT, 'mbrat')
+MBRAT_PYD = path.join(MBRAT_HOME, 'mbrat')
+MBRAT_PYVER = 'python2.7'
 
-MBRAT_USRD = path.join(MBRAT_ROOT, 'usr')
+MBRAT_ROOT_USRD = path.join(MBRAT_HOME, 'usr')
+MBRAT_HOME_USRD = path.join(os.environ['HOME'], '.config', MBRAT_PROG, 'usr')
+MBRAT_USRD = MBRAT_HOME_USRD if path.exists(MBRAT_HOME_USRD) else MBRAT_ROOT_USRD
+MBRAT_USR_CFGF = path.join(MBRAT_USRD, 'usr.cfg')
 MBRAT_POOLSD = path.join(MBRAT_USRD, 'pools')
 MBRAT_PROFILESD = path.join(MBRAT_USRD, 'profiles')
 MBRAT_CURRENTL = '_current'
+
+MBRAT_TMPD = path.join(MBRAT_USRD, 'tmp')
+MBRAT_TMPF = path.join(MBRAT_TMPD, 'tmp.cfg')
+MBRAT_TMP_IMGF = path.join(MBRAT_TMPD, 'tmp.png')
+
+MBRAT_ETCD = path.join(MBRAT_HOME, 'etc')
 
 MBRAT_CFG_TYPE_L = ['pool', 'poolkey', 'profile', 'privkey', 'pubkey',]
 MBRAT_EXTCFG_TYPE_L = MBRAT_CFG_TYPE_L[:].append('tmp')
@@ -33,12 +60,6 @@ MBRAT_CFG_DEPTREE_D = {
     'pubkey':  [],
     }
 
-MBRAT_USR_CFGF = path.join(MBRAT_USRD, 'usr.cfg')
-
-MBRAT_TMPD = path.join(MBRAT_USRD, 'tmp')
-MBRAT_TMPF = path.join(MBRAT_TMPD, 'tmp.cfg')
-MBRAT_TMP_IMGF = path.join(MBRAT_TMPD, 'tmp.png')
-
 # some default settings...
 
 MBRAT_DEF_PRECISION = 53
@@ -48,7 +69,16 @@ MBRAT_DEF_DRAW_D = {
     'iters': 100, 'ppu': 96, 'cmap': "bw", 
     'lims': {'low':complex(-2.25, -1.25), 
              'high':complex(1.0, 1.25)},
-    }
+}
+
+MBRAT_DEF_USR_D = {
+    'prefs': {
+        'savetemp': "True",
+        'showpoints': "True",
+        'lts': "False",
+        'mpbackend': MBRAT_DEF_MPBACKEND,
+    },
+}
 
 MBRAT_DEF_POOL_D = { 
     'pool': {
@@ -58,30 +88,30 @@ MBRAT_DEF_POOL_D = {
         'y_lo': "-1.25", 'x_lo': "-2.25",
         'ppu': "96", 
         'iters': "100",
-        'info': "New Point Pool. Use 'pool --set' to alter properties.",
-        },
-    }
+        'info': "Point Pool. Use 'pool --set' to alter properties.",
+    },
+}
 
 MBRAT_DEF_POOLKEY_D = {
     'poolkey': {
-        'info': "New Public Pool-Key. Use 'poolkey --set' to alter properties.",
+        'info': "Public Pool-Key. Use 'poolkey --set' to alter properties.",
         'pool': "skelpool",
-        'real': "0.0",
-        'imag': "0.0",
+        'real': "-0.001",
+        'imag': "0.001",
         'ix': "",
         'iy': "",
-        },
-    }
+    },
+}
 
 MBRAT_DEF_PRIVKEY_D = {
     'privkey': {
-        'info': "New Private Key. Use 'privkey --set' to alter properties.",
+        'info': "Private Key. Use 'privkey --set' to alter properties.",
         'prec': "53",
         'real': "0.001",
         'imag': "-0.001",
         'ix': "",
         'iy': "",
-        },
+    },
     'pool': {
         'image': "",
         'cmap': "bw",
@@ -89,8 +119,8 @@ MBRAT_DEF_PRIVKEY_D = {
         'y_lo': "-1.25", 'x_lo': "-2.25",
         'ppu': "96", 
         'iters': "25",
-        },
-    }
+    },
+}
 
 
 """
