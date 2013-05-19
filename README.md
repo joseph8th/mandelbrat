@@ -16,7 +16,7 @@ SYSTEM REQUIREMENTS
 
 During the development versions, MandelBrat will rely on Boost (C++) extensions to Python 2.7. For GCC to compile these, you're gonna want to have Boost::Multiprecision and Boost::Python libraries on your include path.
 
-Plan is to do away with these... somehow... by the time v0.1-alpha is released.
+Plan is to do away with these... somehow... by the time v0.2 is released.
 
 MandelBrat also relies on Gtk+ 3. Sorry stick-in-the-muds... time for an upgrade.
 
@@ -24,30 +24,36 @@ MandelBrat also relies on Gtk+ 3. Sorry stick-in-the-muds... time for an upgrade
 INSTALLATION
 ============
 
-Notes 
------
+Version Notes
+-------------
 
-- `setup.py` currently has limited use to building the extension module.
+- `setup.py` currently has limited use to building the extension module. Dependencies will *not* be satisfied by Distutils.
 - `mbrat` would like install a 'usr' configuration tree in your `$HOME/.config/` directory, and itself in a `$HOME/.mbrat directory`, with an executable in your `/usr/local/bin`
-- `git <http://git-scm.com/download/linux>`_ and `python2.7` are required to install and run
-- `boost <http://www.boost.org/users/download/>`_, `mpfr <http://www.mpfr.org/mpfr-current/#download>`, and `gmp <http://gmplib.org/>` libraries are required on your include path.
-- There is no systemwide install because this will eventually be a crypto program. Users have their own 'usr' trees, and crypto will be provided for MandelBrat as an advanced exploration of released SPIs of the `mbrat` API. Get it? The fun Mandelbrot Set you know and love makes `mbrat` possible, but the crypto functions can't be a *toy*.
+- There is no systemwide install because this will eventually be a crypto program. Users have their own 'usr' trees, and crypto will be provided for MandelBrat as an advanced exploration of released SPIs of the `mbrat` API. Get it? The fun Mandelbrot Set you know and love makes `mbrat` possible, but the crypto functions can't be a *toy*
+
+Requirements
+------------
+
+- GNU/Linux operating system with Gtk+ 3 libraries
+- `[git](http://git-scm.com/download/linux)` and `python2.7` are required to install and run
+- `[boost](http://www.boost.org/users/download/)`, `[mpfr](http://www.mpfr.org/mpfr-current/#download)`, and `[gmp](http://gmplib.org/)` libraries are required on your include path
+- `[PyPNG](http://pythonhosted.org/pypng/index.html)` Python package is required to run
 
 Install Procedure
 -----------------
 
 Execute the following statements in your shell (do _not_ type the prompt, `$`) ::
 
-  $ git clone https://github.com/joseph8th/mandelbrat.git
-  $ cd mandelbrat
-  $ ./mbrat-install
+    $ git clone https://github.com/joseph8th/mandelbrat.git
+    $ cd mandelbrat
+    $ ./mbrat-install
 
 Install Help
 ------------
 
 Instead of last step above, just execute::
 
-  $ ./mbrat-install -h
+    $ ./mbrat-install -h
 
 
 USAGE
@@ -59,11 +65,11 @@ MandelBrat may be used either from your shell (the command line terminal of your
 
 To run MandelBrat from the command line, run the following and then choose a command::
 
-  $ mbrat --help
+    $ mbrat --help
 
 To run the MandelBrat GUI, run the following command::
 
-  $ mbrat gui 
+    $ mbrat gui 
 
 
 COMMANDS
