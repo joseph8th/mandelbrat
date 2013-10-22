@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec "/home/notroot/.mbrat/mbrat.py" "$@"

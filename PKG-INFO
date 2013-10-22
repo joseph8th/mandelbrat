@@ -1,0 +1,77 @@
+Overview
+========
+
+MandelBrat* (`mbrat`) is a Linux explorer for Mandelbrot Set-based fractal key crytographic services -- called SPIs to follow the Java Security API convention.
+
+Both the Mandelbrot Set explorer and crypto functionality may be accessed either from the command line, or via built-in GUI (Gtk+ 3).
+
+* This version is pre-release of an eventual alpha version, and not everything is implemented.
+
+
+Installation
+============
+
+Notes 
+-----
+
+- `setup.py` currently has limited use to building the extension module.
+- `mbrat` would like to install in your $HOME/.config/ directory, and will make one if needed.
+- `git <http://git-scm.com/download/linux>`_ and `python2.7` are required to install and run.
+- `boost <http://www.boost.org/users/download/>`_, `mpfr <http://www.mpfr.org/mpfr-current/#download>`, and `gmp <http://gmplib.org/>` libraries are required on your include path.
+- There is no systemwide install because this is a crypto program. Users are isolated.
+
+Procedure
+---------
+
+Execute the following statements in your shell (do _not_ type the prompt, `$`) ::
+
+  $ git clone https://github.com/joseph8th/mandelbrat.git
+  $ cd mandelbrat
+  $ ./mbrat-install
+
+
+Usage
+=====
+
+mbrat command [options]
+
+MandelBrat may be used either from your shell (the command line terminal of your Linux OS) or via a graphical user interface (GUI) if Gtk+ 3.0 is installed on your computer.
+
+To run MandelBrat from the command line, run the following and then choose a command::
+
+  $ mbrat --help
+
+To run the MandelBrat GUI, run the following command::
+
+  $ mbrat gui 
+
+
+COMMANDS
+========
+
+Changelog
+=========
+
+0.1g (2013-04-14)
+-----------------
+
+MandelBrat - Mandelbrot Set-based crypto explorer
+
+VERSION: 0.1g [Git-dev]
+
+USAGES:
+        $ mbrat gui
+        $ mbrat -h
+
+DESCRIPTION:
+
+    This version is not fully functional. The cryptographic algorithms are not implemented here.
+These are being developed with their own interfaces, so they may be implemented via other crypto
+packages as well (i.e., openssl, /dev/crypto, JavaSec SPIs, etc).
+
+Expect these features starting with v1.0. 
+
+AUTHOR:
+        Joseph Edwards VIII
+        www.urcomics.com/git
+        joseph8th@urcomics.com

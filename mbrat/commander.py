@@ -9,6 +9,7 @@ from mbrat import commands
 from mbrat.configmgr import ConfigManager
 from mbrat.mscreen import PyMScreen
 from mbrat.util import arglist_parse_to_dict
+from mbrat.settings import MBRAT_ROOT
 
 
 class Command(object):
@@ -34,7 +35,6 @@ class ConfigCommand(object):
     name = None
     description = ""
     help = ""
-#    make = None
 
     def __init__(self):
         self.parser = subparsers.add_parser(name = self.name,
@@ -42,8 +42,9 @@ class ConfigCommand(object):
                                             help = self.help)
 
         self.group = self.parser.add_mutually_exclusive_group()
-        self.group.add_argument( "--ls", action='store_true',
-                                 help="list available {}(s)".format(self.name) )
+        self.group.add_argument( 
+            "--ls", action='store_true',
+            help="list available {}(s)".format(self.name) )
         self.group.add_argument( "--vi", action='store_true',
                                  help="view info about current {}".format(self.name) )
         self.group.add_argument( "--mk", action='store',
@@ -211,7 +212,7 @@ def get_cmd_list():
     Assumes /commands/*.py are commands if '__' is not in filename.
     """
     return [fname for fname, fext in map( splitext, 
-                                          os.listdir(join(os.getcwd(), 'mbrat/commands')) )
+                                          os.listdir(join(MBRAT_ROOT, 'mbrat/commands')) )
             if fext == '.py' and '__' not in fname]
 
 

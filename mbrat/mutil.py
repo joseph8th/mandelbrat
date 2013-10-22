@@ -1,99 +1,19 @@
+from os import path
+from bigfloat import BigFloat, mul
+#from mpmath import mp, mpc, fmul
 
-class Arguments(object):
-    """
-    An argument class with dict-parametric constructor. """
-
-    def __init__(self, arg_d={}):
-        for key, val in arg_d.iteritems():
-            setattr(self, key, val)
+from mbrat.util import Arguments
+from mbrat.mscreen import PyMScreen
 
 
-def arglist_parse_to_dict(arg_l):
-    """
-    Function to parse either string or 2-D array arg lists into a dict. """
+# mandelbrot set generic functions (too useful to be methods)
 
-    prop_d = {}
-    for prop in arg_l:
-        if len(prop) == 2:
-            prop_l = prop
-        elif ':' in prop:
-            prop_l = prop.split(':')
-        elif '=' in prop:
-            prop_l = prop.split('=')
-        else:
-            exit( "==> ERROR: invalid config. Use '=' or ':'." )
-        if not len(prop_l) == 2:
-            exit( "==> ERROR: invalid config. Use one '=' per setting." )
-        prop_d[prop_l[0]] = prop_l[1]
-
-    return prop_d
-
-
-
-# general generic functions (too general to be methods)
-
-def clogger(logstr, lts=False, err=False):
-    """ 
-    Function to route log to stdout, GUI console. """
-
-    from sys import stderr
-
-    # lts = log_to_stdout
-    if lts:
-        if not err:
-            print logstr
-        else:
-            stderr.write(logstr)
-        logstr = ""
-
-    return logstr
-
-
-def mb_mkdirs(target):
-    """
-    Function to make directories or error back. """
-
-    from os import makedirs, error
-    try:
-        makedirs(target, 0755)
-    except error as e:
-        print "==> ERROR: ({0}): {1}".format(e.errno, e.strerror)
-        return False
-    else:
-        return True
-
-
-
-def execSubproc(exelist, envdict=None, shell=True):
-    """ 
-    Function to execute commands in various ways. """
-
-    from os import environ, path
-    import subprocess
-
-    # change environ of subprocess if nec.
-    env = environ.copy()
-    if envdict:
-        for var, val in envdict.iteritems():
-            env[var] = val
-
-    # execute each command in the given list
-    for exe in exelist:
-        if shell:
-            exe = " ".join(exe)
-        print "==> Executing command '{}' ...".format(exe)
-        subproc = subprocess.Popen(exe, env=env, shell=shell,
-                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        pout, perr = subproc.communicate()
-        if pout:
-            print pout
-        if perr:
-            print perr
-            return False
-        print "==> Execution complete."
-
-    # all done executing commands? ok...
-    return True
+def pyMFun(c, z0, e, n):
+    z = BigFloat.exact(z0)
+    while n > 0:
+        z = mul(z, mul(e, mul(c, c)))
+        n -= 1
+    return z
 
 
 def mpoint_pick_random(self, key_t, lts=False):
@@ -107,9 +27,6 @@ def mpoint_pick_random(self, key_t, lts=False):
     
     """
  
-    from os import path
-    from mbrat.mscreen import PyMScreen
-
     errstr = ""
     logstr = clogger( "\nPicking a random {} key-point ...".format(key_t), lts )
 
@@ -162,9 +79,7 @@ def mpoint_pick_random(self, key_t, lts=False):
     # update current *key config file
     self.secmgr[key_t].reset_section()
     self.secmgr[key_t].set_write( {'real': pt.real, 'imag': pt.imag,
-                                   'ix': pt.Get_ix(), 'iy': pt.Get_iy(),
                                    'info': "Randomly selected key-point.",} )
     self.secmgr[key_t].read()
 
     return Arguments( {'log': logstr, 'err': errstr, 'mpoint': pt} )
-
