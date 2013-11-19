@@ -147,7 +147,7 @@ bool MPoint :: Get_InMSet() { return inmset; }
 */
 
 /*********************************************
- * attempt at multiprec version is unnec. slow for now ... 
+ * attempt at multiprec version is unnec. slow for PoC ... 
  *********************************************
 void MPoint :: Run_MFun(unsigned long itermax, mpfloat x, mpfloat y) {
   mpfloat tmp;

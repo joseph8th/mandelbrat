@@ -1,11 +1,28 @@
 
 class Arguments(object):
     """
-    An argument class with dict-parametric constructor. """
+    An argument class with dict-parametric constructor. 
+    Set the '__str__' and '__repr__' methods with method set_string(s).
+    """
 
-    def __init__(self, arg_d={}):
+    def __init__(self, arg_d={}, string=None):
+
         for key, val in arg_d.iteritems():
             setattr(self, key, val)
+
+        self.set_string(string)
+
+    def set_string(self, s):
+        if not s:
+            self.string = self
+        else:
+            self.string = s
+
+    def __str__(self):
+        return self.string
+
+    def __repr__(self):
+        return self.string
 
 
 def arglist_parse_to_dict(arg_l):
@@ -36,12 +53,12 @@ def clogger(logstr, lts=False, err=False):
     """ 
     Function to route log to stdout, GUI console. """
 
-    from sys import stderr
+    from sys import stdin, stderr
 
     # lts = log_to_stdout
     if lts:
         if not err:
-            print logstr
+            print "{}".format(logstr)
         else:
             stderr.write(logstr)
         logstr = ""

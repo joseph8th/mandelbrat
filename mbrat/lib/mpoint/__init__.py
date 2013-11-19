@@ -4,6 +4,8 @@ from math import ceil
 from mpmath import mp, mpmathify
 from bigfloat import BigFloat, precision
 
+from mbrat.mutil import MultiLibMPC as mlmpc
+from mbrat.settings import MBRAT_PREC_FACTOR
 
 MPoint.mp_t = None
 
@@ -17,45 +19,65 @@ def get_mp_t(self):
 MPoint.set_mp = set_mp_t
 MPoint.get_mp = get_mp_t
 
+def mp_c(self):
+    return mlmpc(self.real, self.imag, self.mp_t, self.prec)
 
-def C(self):
-    if self.mp_t == 'mpmath':
-        mp.dps = self.prec
-        mpt = ( mpmathify(self.real), mpmathify(self.imag) )
-    elif self.mp_t == 'bigfloat':
-        mpt = ( BigFloat.exact(self.real, precision=int(ceil(self.prec*3.33))), 
-                BigFloat.exact(self.imag, precision=int(ceil(self.prec*3.33))) )
-    else:
-        mpt = self.c
+MPoint.mp_c = mp_c
 
-    return mpt
+#def C(self):
+#    return self.mp_c()
+
+    #if self.mp_t == 'mpmath':
+    #    mp.dps = self.prec
+    #    mpt = ( mpmathify(self.real), mpmathify(self.imag) )
+    #elif self.mp_t == 'bigfloat':
+    #    mpt = ( 
+    #        BigFloat.exact(
+    #            self.real, precision=int(ceil(self.prec*MBRAT_PREC_FACTOR))), 
+    #        BigFloat.exact(
+    #            self.imag, precision=int(ceil(self.prec*MBRAT_PREC_FACTOR))) 
+    #    )
+    #else:
+    #    mpt = self.c
+    #return mpt
 
 
 def Real(self):
-    if self.mp_t == 'mpmath':
-        mp.dps = self.Get_Prec()
-        x = mpmathify(self.real)
-    elif self.mp_t == 'bigfloat':
-        x = BigFloat.exact(self.real, precision=int(ceil(self.prec*3.33)))
-    else:
-        x = self.real
+    return self.mp_c().real
 
-    return x
+    #if self.mp_t == 'mpmath':
+    #    mp.dps = self.Get_Prec()
+    #    x = mpmathify(self.real)
+    #elif self.mp_t == 'bigfloat':
+    #    x = BigFloat.exact(
+    #        self.real, precision=int(ceil(self.prec*MBRAT_PREC_FACTOR)))
+    #else:
+    #    x = self.real
+    #return x
 
 
 def Imag(self):
-    if self.mp_t == 'mpmath':
-        mp.dps = self.Get_Prec()
-        y = mpmathify(self.imag)
-    elif self.mp_t == 'bigfloat':
-        y = BigFloat.exact(self.imag, precision=int(ceil(self.prec*3.33)))
-    else:
-        y = self.imag
+    return self.mp_c().imag
 
-    return y
+    #if self.mp_t == 'mpmath':
+    #    mp.dps = self.Get_Prec()
+    #    y = mpmathify(self.imag)
+    #elif self.mp_t == 'bigfloat':
+    #    y = BigFloat.exact(
+    #        self.imag, precision=int(ceil(self.prec*MBRAT_PREC_FACTOR)))
+    #else:
+    #    y = self.imag
+    #return y
+
+
+def __repr__(self):
+    return ( 'MPoint(real=%s imag=%s precision=%s)'
+             % ( repr((self.mp_c()).real), repr((self.mp_c()).imag), 
+                 repr(ceil((self.mp_c()).prec)) ) )
 
 
 # now let these methods be members of MPoint...
-MPoint.BigC = C
+#MPoint.BigC = C
 MPoint.Real = Real
 MPoint.Imag = Imag
+MPoint.__repr__ = __repr__

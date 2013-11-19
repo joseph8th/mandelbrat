@@ -1,13 +1,14 @@
 import os
 from os import path
 from shutil import rmtree
-from mpmath import mp, mpc, nstr
-from mpmath import mpmathify as mpify
+#from mpmath import mp, mpc, nstr
+#from mpmath import mpmathify as mpify
 
 from mbrat.commander import ConfigCommand
 from mbrat.mscreen import PyMScreen
 from mbrat.util import arglist_parse_to_dict
-from mbrat.functions import pyMFun
+from mbrat.mutil import MandelFun as mfun
+from mbrat.mutil import MultiLibMPC as mlmpc
 
 
 class PrivKeyCommand(ConfigCommand):
@@ -90,31 +91,43 @@ class PrivKeyCommand(ConfigCommand):
         poolkey_cfg = self.cfgmgr.secmgr['poolkey']
 
         # prepare new pubkey meta for file ops
-        pubkeyd = path.join( self.cfgmgr.get_cfg_parentd('privpub'), args.genpub )
-        pubkeyf = path.join( pubkeyd, "{}.cfg".format(args.genpub) )
+        pubkeyd = path.join( 
+            self.cfgmgr.get_cfg_parentd('privpub'), args.genpub )
+        pubkeyf = path.join( 
+            pubkeyd, "{}.cfg".format(args.genpub) )
+
         try:
             os.mkdir(pubkeyd)
         except OSError:
             print "==> Modifying '{}' ...".format(args.genpub)
 
         # set up the necessary values and types
-        priv_prop_l = arglist_parse_to_dict( self.config.items() ).keys()
-        if 'prec' in priv_prop_l:
-            dps = int( self.config.get('prec') )
-            mp.dps = dps
-        else:
-            dps = mp.dps
+        #        priv_prop_l = arglist_parse_to_dict( self.config.items() ).keys()
+        #        if 'prec' in priv_prop_l:
+        #            dps = int( self.config.get('prec') )
+        #            mp.dps = dps
+        #        else:
+        #            dps = mp.dps
 
-        poolkey = mpc( real = mpify(poolkey_cfg.get('real')),
-                       imag = mpify(poolkey_cfg.get('imag')) )
-        privkey = mpc( real = mpify(self.config.get('real')),
-                       imag = mpify(self.config.get('imag')) )
+        # poolkey = mpc( real = mpify(poolkey_cfg.get('real')),
+        #             imag = mpify(poolkey_cfg.get('imag')) )
+        # privkey = mpc( real = mpify(self.config.get('real')),
+        #             imag = mpify(self.config.get('imag')) )
+
+        poolkey = mlmpc( x = poolkey_cfg.get('real'),
+                         y = poolkey_cfg.get('imag'),
+                         prec = self.config.get('prec') )
+
+        privkey = mlmpc( real = self.config.get('real'),
+                         imag = self.config.get('imag'),
+                         prec = self.config.get('prec') )
 
         pooliters = int( pool_cfg.get('iters') )
-        priviters = pooliters + int( self.config.get_from_section('pool', 'iters') )
+        priviters = pooliters + int( 
+            self.config.get_from_section('pool', 'iters') )
 
-        # generate the pubkey, make property dict, write_set to new config file...
-        pubkey = pyMFun( poolkey, poolkey, privkey, priviters )
+        # generate the pubkey, make property dict, write_set to new config
+        pubkey = mfun().run( poolkey, poolkey, privkey, priviters )
 
         prop_d = { 
             'pubkey': {

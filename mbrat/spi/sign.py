@@ -7,8 +7,8 @@ class MBratSPI(object):
     def set_function(self, svcfun):
 
         if not svcfun:
-            from mbrat.functions import pyMFun
-            svcfun = pyMFun
+            from mbrat.functions import MandelFun
+            svcfun = MandelFun
 
         self.function = svcfun
 

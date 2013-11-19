@@ -3,8 +3,8 @@ import cairo
 from math import pi
 from gi.repository import Gtk
 
-from mbrat.mscreen import PyMScreen
-from mbrat.util import Arguments, mpoint_pick_random, clogger
+from mbrat.util import Arguments, clogger
+from mbrat.mutil import mpoint_pick_random
 from mbrat.settings import MBRAT_GUI_POOL_TYPE_L as POOL_TYPE_L
 
 POOL_TYPES = { 
@@ -26,6 +26,8 @@ class MScreenTabs(object):
 
 
     def _init_tabs(self):
+
+        from mbrat.mscreen import PyMScreen
 
         self.tab = POOL_TYPES
 

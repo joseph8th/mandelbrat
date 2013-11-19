@@ -3,13 +3,13 @@ from os import path
 from mbrat.commander import Command
 from mbrat.configmgr import ConfigManager
 
-class CryptoCommand(Command):
-    name = "crypto"
+class CryptCommand(Command):
+    name = "crypt"
     description = "Encryption and decryption using current profile privkey."
     help = "encryption and decryption"
 
     def __init__(self):
-        super(CryptoCommand, self).__init__()
+        super(CryptCommand, self).__init__()
         self.group = self.parser.add_mutually_exclusive_group()
         self.group.add_argument( "--encrypt", "-e", action='store_true',
                                   help="encrypt the INFILE" )
@@ -59,4 +59,4 @@ class CryptoCommand(Command):
 
 
 # instantiate command
-CryptoCommand()
+CryptCommand()

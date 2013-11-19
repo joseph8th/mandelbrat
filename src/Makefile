@@ -1,10 +1,23 @@
+CREG = gcc
 CPP = g++
-CPPFLAGS = -g -Wall -ansi -pedantic
-SFLAGS = -fPIC -lboost_python -lpython2.7 -lmpfr -lgmp -I /usr/include/python2.7
+CFLAGS = -g -Wall -ansi -pedantic
+SFLAGS_BOOST = -fPIC -lboost_python -lpython2.7 -lmpfr -lgmp -I /usr/include/python2.7
+SFLAGS = -fPIC -lpython2.7 -lmpfr -lgmp -I /usr/include/python2.7
 
-all: shared
+all: sharedcpp sharedc
 
-shared: mpoint.so
+testc: test_mpointc.o
+	$(CREG) -g $^ -o $@
+
+sharedcpp: mpoint.so
+
+sharedc: mpointc.so
 
 %.so: %.cpp %.hpp
-	$(CPP) $(CPPFLAGS) $^ $(SFLAGS) -o $@ -shared
+	$(CPP) $(CFLAGS) $^ $(SFLAGS_BOOST) -o $@ -shared
+
+%.so: %.c %.h
+	$(CREG) $(CFLAGS) $^ $(SFLAGS) -o $@ -shared
+
+%.o: %.c %.h
+	$(CREG) -c $(CFLAGS) $<

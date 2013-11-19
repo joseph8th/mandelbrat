@@ -2,15 +2,17 @@ from os import path
 
 from mbrat.commander import Command
 from mbrat.configmgr import ConfigManager
-from mbrat.functions import pyMFun
+from mbrat.mutil import MandelFun
 
-class SignCommand(Command):
-    name = "sign"
+
+
+class SigCommand(Command):
+    name = "sig"
     description = "Sign or validate a file using current profile privkey and a given target pubkey from the same pool. To stdout."
     help = "sign and validate plaintext"
 
     def __init__(self):
-        super(SignCommand, self).__init__()
+        super(SigCommand, self).__init__()
         self.group = self.parser.add_mutually_exclusive_group()
         self.group.add_argument( 
             "--sign", "-s", action='store_true',
@@ -53,7 +55,7 @@ class SignCommand(Command):
     def run_sign(self, args):
 
         from mbrat.spi.sign import SignSPI
-        self.spi = SignSPI(pyMFun)
+        self.spi = SignSPI(MandelFun)
 
         privkey_cfg = self.cfgmgr.secmgr['privkey']
         poolkey_cfg = self.cfgmgr.secmgr['poolkey']
@@ -71,7 +73,7 @@ class SignCommand(Command):
     def run_valid(self, args):
 
         from mbrat.spi.sign import ValidateSPI
-        self.spi = ValidateSPI(pyMFun)
+        self.spi = ValidateSPI(MandelFun)
 
         print "Validating '{0}'\n  -> source pubkey {1} ...".format(
             args.infile, args.valid)
@@ -80,4 +82,4 @@ class SignCommand(Command):
 
 
 # instantiate command
-SignCommand()
+SigCommand()
