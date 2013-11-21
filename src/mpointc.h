@@ -2,6 +2,8 @@
 #define MPOINTC_H
 
 #include <inttypes.h>
+
+#include <gmp.h>
 #include <mpfr.h>
 
 typedef void (*Mpfr2Str)(mpfr_t number, char ** strbuf) ;
@@ -27,6 +29,6 @@ typedef struct mpt_t {
   TraceBuf * trace;
 } MPt; 
 
-extern void inMset(size_t prec, size_t iter, MPt * mpt) ;
+extern int inMset(size_t prec, size_t iter, MPt * mpt) ;
 
 #endif /* MPOINTC_H */

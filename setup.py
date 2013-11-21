@@ -19,9 +19,10 @@ setup(
     long_description = long_description,
     author = 'Joseph E Edwards VIII',
     author_email = 'joseph8th@notroot.us',
-    url = 'http://notroot.us',
+    url = 'https://github.com/joseph8th/mandelbrat',
 
     ext_modules = [mpoint_module],
 
-    packages = ['mbrat', 'mbrat.commands', 'mbrat.mbrat_gui', 'mbrat.lib', 'mbrat.lib.mpoint',],
+    packages = ['mbrat', 'mbrat.commands', 'mbrat.spi', 
+                'mbrat.mbrat_gui', 'mbrat.lib', 'mbrat.lib.mpoint',],
 )
