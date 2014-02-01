@@ -10,7 +10,39 @@ from mbrat.settings import MBRAT_PROG, MBRAT_VER, MBRAT_PYD, MBRAT_PYVER, MBRAT_
     MBRAT_ETCD, MBRAT_CMDF
 
 
-def _install_libs(install_path):
+def _install_usrd():
+    
+    print "Installing 'usr' configuration tree to\n  -> {}".format(MBRAT_HOME_USRD)
+
+    if path.exists(MBRAT_HOME_USRD):
+        print "==> ERROR: 'usr' dir already exists at\n  -> {}".format(MBRAT_HOME_USRD)
+        return False
+
+    # ... and use ConfigManager to do the rest
+    cm = ConfigManager(usr_cfgf=path.join(MBRAT_HOME_USRD, 'usr.cfg'))
+    print cm.logstr()
+    e = cm.errstr()
+    if e:
+        print "==> ERROR: Unable to install because ...\n" + e
+        return False
+
+    return True
+
+
+###########333
+def _install_deps():
+    """ Pre-install required Python packages. """
+
+    print "Installing required Python packages ..."
+    run = execSubproc( [['sudo', 'easy_install-2.7', 'pypng',],], shell=False )
+
+    if not run:
+        return False
+
+    return True
+
+
+def _install_shared_libs(install_path):
     """ Pre-install required extension module shared object files into source directories. """
 
     build_path = path.join(install_path, 'build')
@@ -55,20 +87,23 @@ def _install_dirs(install_path):
     # copy python scripts ...
     err_l = []
     try:
-        copytree( path.join(install_path, 'mbrat'), path.join(MBRAT_CONFD, 'mbrat'), 
-                  ignore=ignore_patterns('*.pyc', '*.pyx', '*~', '*#*'), symlinks=True )
+        copytree( path.join(install_path, 'mbrat'), 
+                  path.join(MBRAT_CONFD, 'mbrat'), 
+                  ignore=ignore_patterns('*~', '*#*'), symlinks=True )
     except Error as e:
         err_l.extend(e)
 
     # copy etc ...
     try:
-        copytree( path.join(install_path, 'etc'), path.join(MBRAT_CONFD, 'etc'),
+        copytree( path.join(install_path, 'etc'), 
+                  path.join(MBRAT_CONFD, 'etc'),
                   ignore=ignore_patterns('*~', '*#*'), symlinks=True )
     except Error as e:
         err_l.extend(e)
 
     # copy executable script ...
-    copy2( path.join(install_path, 'mbrat.py'), path.join(MBRAT_CONFD) )
+    copy2( path.join(install_path, 'mbrat.py'), 
+           path.join(MBRAT_CONFD) )
     if not path.exists( path.join(MBRAT_CONFD, 'mbrat.py') ):
         err_l.append( (path.join(install_path, 'mbrat.py'),
                        path.join(MBRAT_CONFD, 'mbrat.py'),
@@ -78,25 +113,6 @@ def _install_dirs(install_path):
     if err_l:
         for e in err_l:
             print str(e) + "\n"
-        return False
-
-    return True
-
-
-def _install_usrd():
-    
-    print "Installing 'usr' configuration tree to\n  -> {}".format(MBRAT_HOME_USRD)
-
-    if path.exists(MBRAT_HOME_USRD):
-        print "==> ERROR: 'usr' dir already exists at\n  -> {}".format(MBRAT_HOME_USRD)
-        return False
-
-    # ... and use ConfigManager to do the rest
-    cm = ConfigManager(usr_cfgf=path.join(MBRAT_HOME_USRD, 'usr.cfg'))
-    print cm.logstr()
-    e = cm.errstr()
-    if e:
-        print "==> ERROR: Unable to install because ...\n" + e
         return False
 
     return True
@@ -165,10 +181,15 @@ def _install_all(install_path):
 
     _install_usrd()
 
-    if not _install_libs(install_path):
+    if not _install_deps():
         return False
+
+    if not _install_shared_libs(install_path):
+        return False
+
     if not _install_dirs(install_path):
         return False
+
     if not _install_exec():
         return False
 
@@ -178,7 +199,7 @@ def _install_all(install_path):
 def _uninstall():
     """ Uninstall everything. """
 
-    print "Uninstalling resources (your 'usr' directory will remain untouched) ..."
+    print "Uninstalling resources ..."
 
     if not path.exists(MBRAT_CONFD):
         print "==> ERROR: MandelBrat is not installed."
@@ -198,8 +219,8 @@ def _uninstall():
 
 
 def _breakdown():
-    if _uninstall():
-        return _uninstall_usrd()
+    _uninstall_usrd()
+    return _uninstall()
 
 
 def installMBrat(install_path, args):
@@ -214,10 +235,10 @@ def installMBrat(install_path, args):
             return False
         return _install_all(install_path)
     elif args.libs:
-        return _install_libs(install_path)
-    elif args.usr:
-        return _install_usrd()
-    elif args.rmusr:
+        return _install_shared_libs(install_path)
+#    elif args.usr:
+#        return _install_usrd()
+    elif args.delete:
         return _uninstall_usrd()
     elif args.breakdown:
         return _breakdown()

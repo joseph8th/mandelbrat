@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-if [ -f ./mbrat_install.py ]; then 
-    /usr/bin/python2 "${PWD}/mbrat_install.py" "$@"
-fi

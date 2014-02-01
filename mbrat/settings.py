@@ -10,6 +10,8 @@ MBrat core settings
 MBRAT_PROG = 'mbrat'
 MBRAT_VER = '0.1h'
 
+MBRAT_PYVER = 'python2.7'
+
 MBRAT_ROOT = os.getcwd()
 MBRAT_CONFD = path.join(os.environ['HOME'], ".{}".format(MBRAT_PROG))
 MBRAT_HOME = MBRAT_ROOT
@@ -33,7 +35,6 @@ MBRAT_LIB_OBJN_L = ['mpoint',]
 MBRAT_LIB_OBJEXT = 'so'
 
 MBRAT_PYD = path.join(MBRAT_HOME, 'mbrat')
-MBRAT_PYVER = 'python2.7'
 
 MBRAT_ROOT_USRD = path.join(MBRAT_HOME, 'usr')
 MBRAT_HOME_USRD = path.join(os.environ['HOME'], '.config', MBRAT_PROG, 'usr')

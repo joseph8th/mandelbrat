@@ -1,1 +1,4 @@
-/home/notroot/Dev/python/mandelbrat/tests/usr/profiles/skelprofile/skelprofile.cfg
+[profile]
+info = 
+name = skelprofile
+

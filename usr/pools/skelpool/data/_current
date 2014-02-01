@@ -1,1 +1,9 @@
-/home/notroot/Dev/python/mandelbrat/usr/pools/skelpool/data/skelpoolkey/skelpoolkey.cfg
+[poolkey]
+info = New Public Pool-Key. Use 'poolkey --set' to alter properties.
+real = 0.0
+name = skelpoolkey
+ix = 
+imag = 0.0
+iy = 
+pool = skelpool
+

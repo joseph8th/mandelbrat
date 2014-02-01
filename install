@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+PYVER=python2.7
+WHICH_PY=`which $PYVER`
+
+[ -e "./mbrat_install.py" ] && $PYVER mbrat_install.py $@ || exit 1
