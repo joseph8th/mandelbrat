@@ -1,5 +1,7 @@
 import png
 import random
+import gmpy2
+
 from os import path
 #from bigfloat import BigFloat, add, sub, div, floor, precision
 
@@ -44,8 +46,8 @@ class PyMScreen(object):
 
 
     def _init_new(self, args):
-        l = self.limits
 
+        l = self.limits
         self.ppu = int(args.ppu)
         self.width = l['high'].real - l['low'].real
         self.height = l['high'].imag - l['low'].imag
