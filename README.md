@@ -1,25 +1,18 @@
 Overview
 ========
 
-MandelBrat (`mbrat`) is a Linux explorer for Mandelbrot Set-based multiprecision fractal key crytographic services -- called SPIs to follow the Java Security API convention. Both the Mandelbrot Set explorer and crypto functionality may be accessed either from the command line, or via built-in GUI (Gtk+ 3).
+MandelBrat (`mbrat`) is a Linux explorer for multiple-precision Mandelbrot Set profiles.
 
 Note
 ----
 
 This version is NOT fully functional. Crypto functionality has not been implemented here. The crypto SPIs are being developed as standalone services for future compatibility with other crypto APIs. Expect all this in v1.0-alpha.
 
-IOW, this version is a pared-down and profile-driven Mandelbrot Set explorer. Don't expect fancy graphics (yet). And you won't find the crypto functions implemented here. :evilgrin:
+IOW, this version is a pared-down and profile-driven Mandelbrot Set explorer. Don't expect fancy graphics (yet).
 
 
 Installation
 ============
-
-Version Notes
--------------
-
-- `setup.py` currently has limited use to building the extension module. Specifically, `setup.py install` will fail.
-- `mbrat` would like install a 'usr' configuration tree in your `$HOME/.config/` directory, and itself in a `$HOME/.mbrat directory`, with an executable in your `/usr/local/bin`
-- There is no systemwide install because this will eventually be a crypto program. Users have their own 'usr' trees, and crypto will be provided for MandelBrat as an advanced exploration of released SPIs of the `mbrat` API.
 
 Requirements
 ------------
@@ -27,12 +20,12 @@ Requirements
 - GNU/Linux operating system with Gtk+ 3 libraries
 - Python 2.7
 - `easy_install-2.7` installed to your `python2.7` path
-- [git](http://git-scm.com/download/linux)
+- [git](http://git-scm.com/download/linux) - for installation and updates
 - [gmp](http://gmplib.org/) >= 5.0.x
 - [mpfr](http://www.mpfr.org/mpfr-current/#download) >= 3.1.0
 - [mpc]() >= 1.0
 
-Required Python packages will be installed by the `install` script using `easy_install-2.7`.
+* NOTE: Required Python packages will be installed by the `bratman` script using `easy_install-2.7`.
 
 Procedure
 ---------
@@ -41,14 +34,20 @@ Execute the following statements in your shell (do _not_ type the prompt, `$`) :
 
     $ git clone https://github.com/joseph8th/mandelbrat.git
     $ cd mandelbrat
-    $ ./install
+    $ ./bratman -i
 
 Install Help
 ------------
 
 Instead of last step above, just execute:
 
-    $ ./install -h
+    $ ./bratman -h
+
+Version Notes
+-------------
+
+- This version of `bratman` here has limited function. Future versions will be generalized and forked to a side project to allow configured deployment of Pythonic "Brats" to further enhance project deployment using standard tools.
+- This version of `mbrat` would like install a 'usr' configuration tree in your `$HOME/.config/` directory, and itself in a `$HOME/.mbrat directory`, with an executable in your `/usr/local/bin`. Don't worry... I'll fix that, soon.
 
 
 Usage

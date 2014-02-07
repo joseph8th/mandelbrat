@@ -7,7 +7,7 @@ from math import pi
 from gi.repository import Gtk #, Gdk
 
 from mbrat.configmgr import SecManager, ConfigManager
-from mbrat.mscreen import PyMScreen
+from mbrat.lib.mscreen import PyMScreen
 from mbrat.settings import MBRAT_VER, MBRAT_TMPF, MBRAT_TMP_IMGF, MBRAT_CFG_TYPE_L, \
     MBRAT_CFG_DEPTREE_D, MBRAT_GUID_GLADEF, MBRAT_USR_CFGF, MBRAT_GUI_DEPTREE_D, \
     MBRAT_DEF_MPBACKEND, cmap_fun
@@ -291,6 +291,7 @@ class mbratgui:
 
         # update the SecManager
         del args.lims
+
         self.sm['tmp'].set_write_to_section('pool', vars(args))
 
         # load it up...

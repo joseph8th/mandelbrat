@@ -10,7 +10,7 @@ class Arguments(object):
         for key, val in arg_d.iteritems():
             setattr(self, key, val)
 
-        self.set_string(string)
+#        self.set_string(string)
 
     def set_string(self, s):
         if not s:
@@ -18,11 +18,11 @@ class Arguments(object):
         else:
             self.string = s
 
-    def __str__(self):
-        return self.string
+ #   def __str__(self):
+ #       return self.string
 
-    def __repr__(self):
-        return self.string
+#    def __repr__(self):
+#        return self.string
 
 
 def arglist_parse_to_dict(arg_l):
@@ -98,7 +98,7 @@ def execSubproc(exelist, envdict=None, shell=True):
     for exe in exelist:
         if shell:
             exe = " ".join(exe)
-        print "==> Executing command '{}' ...".format(exe)
+#        print "==> Executing command '{}' ...".format(exe)
         subproc = subprocess.Popen(exe, env=env, shell=shell,
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         pout, perr = subproc.communicate()
@@ -107,7 +107,7 @@ def execSubproc(exelist, envdict=None, shell=True):
         if perr:
             print perr
             return False
-        print "==> Execution complete."
+ #       print "==> Execution complete."
 
     # all done executing commands? ok...
     return True
@@ -125,7 +125,7 @@ def mpoint_pick_random(self, key_t, lts=False):
     """
  
     from os import path
-    from mbrat.mscreen import PyMScreen
+    from mbrat.lib.mscreen import PyMScreen
 
     errstr = ""
     logstr = clogger( "\nPicking a random {} key-point ...".format(key_t), lts )
@@ -172,13 +172,13 @@ def mpoint_pick_random(self, key_t, lts=False):
 
     # MScreen method returns a random MPoint object
     pt = ms.get_mpoint()
-    logstr += clogger( "\n==> Point picked: ({0}, {1})\n".format( pt.real, pt.imag )
+    logstr += clogger( "\n==> Point picked: ({0}, {1})\n".format( pt.C.real, pt.C.imag )
                        + "  -> Index: [{0}, {1}]".format( pt.Get_ix(), pt.Get_iy() ),
                        lts )
 
     # update current *key config file
     self.secmgr[key_t].reset_section()
-    self.secmgr[key_t].set_write( {'real': pt.real, 'imag': pt.imag,
+    self.secmgr[key_t].set_write( {'real': pt.C.real, 'imag': pt.C.imag,
                                    'ix': pt.Get_ix(), 'iy': pt.Get_iy(),
                                    'info': "Randomly selected key-point.",} )
     self.secmgr[key_t].read()

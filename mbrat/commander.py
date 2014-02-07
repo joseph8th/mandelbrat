@@ -7,7 +7,7 @@ from shutil import rmtree
 from mbrat.argparser import subparsers
 from mbrat import commands
 from mbrat.configmgr import ConfigManager
-from mbrat.mscreen import PyMScreen
+from mbrat.lib.mscreen import PyMScreen
 from mbrat.util import arglist_parse_to_dict
 from mbrat.settings import MBRAT_ROOT
 
@@ -191,7 +191,7 @@ class ConfigCommand(object):
         print "  -> Index: [ix,iy] = [{0}, {1}]".format( pt.Get_ix(), pt.Get_iy() )
         # update current *key config file
         self.config.reset_section()
-        self.config.set_write( {'real': pt.real, 'imag': pt.imag,
+        self.config.set_write( {'real': pt.C.real, 'imag': pt.C.imag,
                                 'ix': pt.Get_ix(), 'iy': pt.Get_iy()} )
 
 

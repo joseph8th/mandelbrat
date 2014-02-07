@@ -4,7 +4,7 @@ import argparse
 import png
 
 from mbrat.commander import Command
-from mbrat.mscreen import PyMScreen
+from mbrat.lib.mscreen import PyMScreen
 from mbrat.configmgr import ConfigManager
 from mbrat.settings import MBRAT_POOLSD, MBRAT_DEF_DRAW_D, cmap_bw, cmap_gs
 

@@ -5,7 +5,7 @@ from shutil import rmtree
 #from mpmath import mpmathify as mpify
 
 from mbrat.commander import ConfigCommand
-from mbrat.mscreen import PyMScreen
+from mbrat.lib.mscreen import PyMScreen
 from mbrat.util import arglist_parse_to_dict
 from mbrat.mutil import MandelFun as mfun
 from mbrat.mutil import MultiLibMPC as mlmpc

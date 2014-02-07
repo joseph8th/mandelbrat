@@ -1,6 +1,7 @@
 import png
 import random
 import gmpy2
+from gmpy2 import mpc, mpfr, add
 
 from os import path
 #from bigfloat import BigFloat, add, sub, div, floor, precision
@@ -22,17 +23,19 @@ class PyMScreen(object):
  
 
     def _init_from(self, args):
+#        from mbrat.util import Arguments
 
-        from mbrat.util import Arguments
         # 1st set the precision ...
         if not hasattr(args, 'prec'):
             args.prec = MBRAT_DEF_PRECISION
         self.prec = int(args.prec)
 
+        gmpy2.get_context().precision = self.prec
+
         # ... make sure lims dict is right ...
         if not hasattr(args, 'lims'):
-            self.limits = { 'low': complex(float(args.x_lo), float(args.y_lo)),
-                            'high': complex(float(args.x_hi), float(args.y_hi)), }
+            self.limits = { 'low': mpc(mpfr(args.x_lo), mpfr(args.y_lo)),
+                            'high': mpc(mpfr(args.x_hi), mpfr(args.y_hi)), }
         else:
             self.limits = args.lims
 
@@ -76,7 +79,7 @@ class PyMScreen(object):
             for ix in range(self.px_width):
                 x = self.limits['low'].real + d*(0.5 + ix)
                 y = self.limits['high'].imag - d*(0.5 + iy)
-                rows[iy].append( MPoint(x, y, int(self.prec/3.333)) )
+                rows[iy].append( MPoint(mpc(x, y), self.prec) )
                 rows[iy][ix].Set_Index(ix, iy)
 
         self.screen = rows
@@ -87,7 +90,7 @@ class PyMScreen(object):
 
         for row in self.screen:
             for pt in row:
-                pt.Run_MFun(self.iters, complex(0,0))
+                pt.Run_MFun(self.iters, complex(0.0, 0.0))
 
 
     def gen_mscreen_from_img(self, imgf):
@@ -115,7 +118,7 @@ class PyMScreen(object):
         for iy in range(len(self.screen)):
             img.append([])
             for pt in self.screen[iy]:
-                img[iy].append( self.cmap(pt.iter, self.iters) )
+                img[iy].append( self.cmap(pt.iters, self.iters) )
         return img
 
 

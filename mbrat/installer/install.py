@@ -15,7 +15,7 @@ def _install_usrd():
     print "Installing 'usr' configuration tree to\n  -> {}".format(MBRAT_HOME_USRD)
 
     if path.exists(MBRAT_HOME_USRD):
-        print "==> ERROR: 'usr' dir already exists at\n  -> {}".format(MBRAT_HOME_USRD)
+        print "Nothing to do. Directory already exists.".format(MBRAT_HOME_USRD)
         return False
 
     # ... and use ConfigManager to do the rest
@@ -184,8 +184,8 @@ def _install_all(install_path):
     if not _install_deps():
         return False
 
-    if not _install_shared_libs(install_path):
-        return False
+#    if not _install_shared_libs(install_path):
+#        return False
 
     if not _install_dirs(install_path):
         return False
@@ -234,8 +234,8 @@ def installMBrat(install_path, args):
         if not _uninstall():
             return False
         return _install_all(install_path)
-    elif args.libs:
-        return _install_shared_libs(install_path)
+#    elif args.libs:
+#        return _install_shared_libs(install_path)
 #    elif args.usr:
 #        return _install_usrd()
     elif args.delete:

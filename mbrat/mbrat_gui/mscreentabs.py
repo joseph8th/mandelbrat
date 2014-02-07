@@ -27,7 +27,7 @@ class MScreenTabs(object):
 
     def _init_tabs(self):
 
-        from mbrat.mscreen import PyMScreen
+        from mbrat.lib.mscreen import PyMScreen
 
         self.tab = POOL_TYPES
 
@@ -129,27 +129,30 @@ class MScreenTabs(object):
     def _draw_layer_in_tab(self, pool_t):
         """ Draws on ImageSurface using Cairo derived Context. """
 
-        if pool_t in ['pool', 'privkey']:
-            sm = self.state(pool_t)
+###########33        print pool_t
+#        sm = self.state(pool_t)
 
-            if pool_t == 'pool':
-                key_cfg = self.state('poolkey')
-            else: 
-                key_cfg = self.state('privkey')
+        key_t = 'poolkey' if pool_t == 'pool' else pool_t            
+        key_cfg = self.state(key_t)
+            
+#        sm.reset_section()
 
-            sm.reset_section()
+        # if key point exists then draw it...
+        ix = key_cfg.get_from_section(key_t, 'ix')
+        iy = key_cfg.get_from_section(key_t, 'iy')
 
-            # if key point exists then draw it...
-            ix = key_cfg.get('ix')
-            iy = key_cfg.get('iy')
-            if ix and iy:
-                ix = float( key_cfg.get('ix') )
-                iy = float( key_cfg.get('iy') )
-                self._draw_point(pool_t, (ix, iy), 5)
+########3333333        print (ix, iy)
+
+        if ix and iy:
+            ix = float( ix )
+            iy = float( iy )
+            self._draw_point(pool_t, (ix, iy), 5)
 
 
     def _draw_point(self, pool_t, ptix, pxrad):
         
+#######33333        print ptix
+
         cr = cairo.Context( self.tab[pool_t]['ims'] )
 
         cr.set_source_rgb(1.0, 0.0, 0.0)
