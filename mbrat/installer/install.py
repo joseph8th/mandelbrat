@@ -20,7 +20,7 @@ def _install_usrd():
 
     # ... and use ConfigManager to do the rest
     cm = ConfigManager(usr_cfgf=path.join(MBRAT_HOME_USRD, 'usr.cfg'))
-    print cm.logstr()
+#    print cm.logstr()
     e = cm.errstr()
     if e:
         print "==> ERROR: Unable to install because ...\n" + e
@@ -34,8 +34,12 @@ def _install_deps():
     """ Pre-install required Python packages. """
 
     print "Installing required Python packages ..."
-    run = execSubproc( [['sudo', 'easy_install-2.7', 'pypng',],], shell=False )
 
+    run = execSubproc( [['sudo', 'easy_install-2.7', 'pypng',],], shell=False )
+    if not run:
+        return False
+
+    run = execSubproc( [['sudo', 'easy_install-2.7', 'gmpy2',],], shell=False )
     if not run:
         return False
 
