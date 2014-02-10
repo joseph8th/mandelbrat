@@ -7,7 +7,7 @@ from shutil import rmtree
 from mbrat.commander import ConfigCommand
 from mbrat.lib.mscreen import PyMScreen
 from mbrat.util import arglist_parse_to_dict
-from mbrat.mutil import MandelFun as mfun
+from mbrat.mutil import mandelfun
 from mbrat.mutil import MultiLibMPC as mlmpc
 
 
@@ -127,7 +127,7 @@ class PrivKeyCommand(ConfigCommand):
             self.config.get_from_section('pool', 'iters') )
 
         # generate the pubkey, make property dict, write_set to new config
-        pubkey = mfun().run( poolkey, poolkey, privkey, priviters )
+        pubkey = mandelfun( poolkey, poolkey, privkey, priviters )
 
         prop_d = { 
             'pubkey': {

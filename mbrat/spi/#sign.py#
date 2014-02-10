@@ -81,9 +81,10 @@ class ValidateSPI(SignatureSPI):
 
     def run_service(self, args):
 
-        # hash the plaintext like the source did
+        # hash the plaintext like the source did, but with diff privkey
 
-        hashtext = self.hasher(args.plaintext).hexdigest()
+        sign_spi = SignSPI(self.function)
+        hash_sig = sign_spi.run(
 
         # also feed it to MFun for comparison ...
 

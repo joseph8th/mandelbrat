@@ -25,7 +25,7 @@ class Command(object):
                                             description = self.description, 
                                             help = self.help)
     def run(self, args):
-        self.run_command(args)
+        return self.run_command(args)
 
 
 class ConfigCommand(object):

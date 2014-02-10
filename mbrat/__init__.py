@@ -5,4 +5,6 @@ def main():
 
     load_commands()
     args = parser.parse_args()
-    args.command.run(args)
+    run = args.command.run(args)
+    if not run:
+        exit(1)

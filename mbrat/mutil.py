@@ -1,4 +1,5 @@
 from os import path
+from gmpy2 import mul
 
 from mbrat.util import Arguments, clogger
 from mbrat.settings import MBRAT_DEF_MPBACKEND, MBRAT_DEF_PRECISION
@@ -33,20 +34,18 @@ def mlmul(u, v):
 
 
 
-class MandelFun(object):
+def mandelfun(c, z0, e, n):
     """ 
     Provides methods used to compute multi-privkey key types.
-    Takes MultiLibMPC objects as parameters. 
+    Takes mpc objects as parameters. 
     """
-
-    def run(self, c, z0, e, n):
         
-        z = z0
-        while n > 0:
-            z = mlmul(z, mlmul(e, mlmul(c, c)))
-            n -= 1
+    z = z0
+    while n > 0:
+        z = mul(z, mul(e, mul(c, c)))
+        n -= 1
 
-        return z
+    return z
 
 
 

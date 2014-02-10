@@ -18,14 +18,15 @@ Requirements
 ------------
 
 - GNU/Linux operating system with Gtk+ 3 libraries
-- Python 2.7
-- `easy_install-2.7` installed to your `python2.7` path
+- Python-2.7
+- `easy_install-2.7` installed to your `python2.7` path (*)
 - [git](http://git-scm.com/download/linux) - for installation and updates
 - [gmp](http://gmplib.org/) >= 5.0.x
 - [mpfr](http://www.mpfr.org/mpfr-current/#download) >= 3.1.0
-- [mpc]() >= 1.0
+- [mpc](http://www.multiprecision.org/index.php?prog=mpc&page=download) >= 1.0
+- [cairo](http://cairographics.org/download/) - for GUI
 
-* NOTE: Required Python packages will be installed by the `bratman` script using `easy_install-2.7`.
+(*) NOTE: Required Python packages will be installed by the `bratman` script using `easy_install-2.7`.
 
 Procedure
 ---------
