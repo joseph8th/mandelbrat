@@ -38,6 +38,7 @@ class SigCommand(Command):
         # instantiate a ConfigManager
         self.cfgmgr = ConfigManager()
         self.config = self.cfgmgr.secmgr['profile']
+        self.cfgparser = ConfigParser()
 
 
     def run_command(self, args):
@@ -58,7 +59,9 @@ class SigCommand(Command):
             # get the  results as a str to write to file
             args.spi['return_dict'] = False
             sig_cfg = self.run_sign(args)
-            cfgf = (path.basename(args.file)).splitext()[0] + '.mbrat'
+            cfgf = path.splitext(path.basename(args.file))[0] + '.mbrat'
+            cfgf = path.join(path.dirname(path.abspath(args.file)), cfgf)
+
             with open(cfgf, 'w') as f:
                 f.write(sig_cfg)
 

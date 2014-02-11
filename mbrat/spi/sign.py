@@ -84,12 +84,12 @@ class ValidateSPI(SignatureSPI):
         # hash the plaintext like the source did, but with diff privkey
 
         sign_spi = SignSPI(self.function)
-        hash_sig = sign_spi.run(
+        hash_sig = sign_spi.run(args)
 
         # also feed it to MFun for comparison ...
 
 ###########333
-        print hashtext
+        print hash_sig
 
 #        hashary = array('c', hashtext)
 #        for i in len(hashtext):
