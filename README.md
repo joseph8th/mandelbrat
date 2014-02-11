@@ -17,6 +17,8 @@ Installation
 Requirements
 ------------
 
+Because `mbrat` uses multiple-precision complex and floating-point numbers, it requires:
+
 - GNU/Linux operating system with Gtk+ 3 libraries
 - Python-2.7
 - `easy_install-2.7` installed to your `python2.7` path (*)
@@ -26,10 +28,10 @@ Requirements
 - [mpc](http://www.multiprecision.org/index.php?prog=mpc&page=download) >= 1.0
 - [cairo](http://cairographics.org/download/) - for GUI
 
-(*) NOTE: Required Python packages will be installed by the `bratman` script using `easy_install-2.7`.
+(*) Required Python packages will be installed by the `bratman` script using `easy_install-2.7`.
 
-Procedure
----------
+Install Procedure
+-----------------
 
 Execute the following statements in your shell (do _not_ type the prompt, `$`) :
 
@@ -66,6 +68,10 @@ To run MandelBrat from the command line, execute one of the following:
 To run the MandelBrat GUI, run the following command:
 
     $ mbrat gui 
+
+NOTE: you may also run `mbrat` directly from the `mbrat.py` script in your cloned `git` directory. Handy for development:
+
+    $ ./mbrat.py -h
 
 
 Changelog
