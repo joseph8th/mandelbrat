@@ -129,10 +129,11 @@
                 <property name="hexpand">True</property>
                 <child>
                   <object class="GtkScrolledWindow" id="controlScrolledwindow">
-                    <property name="width_request">340</property>
+                    <property name="width_request">365</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hexpand">True</property>
+                    <property name="window_placement_set">True</property>
                     <child>
                       <object class="GtkViewport" id="controlViewport">
                         <property name="visible">True</property>
@@ -1131,11 +1132,12 @@
                                                     <property name="visible">True</property>
                                                     <property name="can_focus">False</property>
                                                     <child>
-                                                      <object class="GtkAspectFrame" id="aspectframe1">
+                                                      <object class="GtkAspectFrame" id="temppoolTabAspect">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">False</property>
                                                         <property name="label_xalign">0</property>
                                                         <property name="shadow_type">none</property>
+                                                        <property name="obey_child">False</property>
                                                         <child>
                                                           <object class="GtkDrawingArea" id="tmpDrawingarea">
                                                             <property name="visible">True</property>
@@ -1169,7 +1171,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkAlignment" id="alignment4">
+                                      <object class="GtkAlignment" id="tabAlignment2">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="top_padding">5</property>
@@ -1177,13 +1179,13 @@
                                         <property name="left_padding">5</property>
                                         <property name="right_padding">5</property>
                                         <child>
-                                          <object class="GtkFrame" id="frame2">
+                                          <object class="GtkFrame" id="tabFrame2">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label_xalign">0</property>
                                             <property name="shadow_type">none</property>
                                             <child>
-                                              <object class="GtkScrolledWindow" id="pubpoolTabScrolledwindow">
+                                              <object class="GtkScrolledWindow" id="poolTabScrolledwindow">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="hexpand">True</property>
@@ -1192,15 +1194,24 @@
                                                 <property name="min_content_width">360</property>
                                                 <property name="min_content_height">280</property>
                                                 <child>
-                                                  <object class="GtkViewport" id="pubpoolTabViewport">
+                                                  <object class="GtkViewport" id="poolTabViewport">
                                                     <property name="visible">True</property>
                                                     <property name="can_focus">False</property>
                                                     <child>
-                                                      <object class="GtkDrawingArea" id="poolDrawingarea">
+                                                      <object class="GtkAspectFrame" id="poolAspect">
                                                         <property name="visible">True</property>
-                                                        <property name="app_paintable">True</property>
                                                         <property name="can_focus">False</property>
-                                                        <signal name="draw" handler="on_poolDrawingarea_draw" swapped="no"/>
+                                                        <property name="label_xalign">0</property>
+                                                        <property name="shadow_type">none</property>
+                                                        <property name="obey_child">False</property>
+                                                        <child>
+                                                          <object class="GtkDrawingArea" id="poolDrawingarea">
+                                                            <property name="visible">True</property>
+                                                            <property name="app_paintable">True</property>
+                                                            <property name="can_focus">False</property>
+                                                            <signal name="draw" handler="on_poolDrawingarea_draw" swapped="no"/>
+                                                          </object>
+                                                        </child>
                                                       </object>
                                                     </child>
                                                   </object>
@@ -1229,7 +1240,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkAlignment" id="alignment6">
+                                      <object class="GtkAlignment" id="tabAlignment3">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="top_padding">5</property>
@@ -1237,7 +1248,7 @@
                                         <property name="left_padding">5</property>
                                         <property name="right_padding">5</property>
                                         <child>
-                                          <object class="GtkFrame" id="frame3">
+                                          <object class="GtkFrame" id="tabFrame3">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label_xalign">0</property>
@@ -1256,11 +1267,20 @@
                                                     <property name="visible">True</property>
                                                     <property name="can_focus">False</property>
                                                     <child>
-                                                      <object class="GtkDrawingArea" id="privkeyDrawingarea">
+                                                      <object class="GtkAspectFrame" id="privpoolAspect">
                                                         <property name="visible">True</property>
-                                                        <property name="app_paintable">True</property>
                                                         <property name="can_focus">False</property>
-                                                        <signal name="draw" handler="on_privkeyDrawingarea_draw" swapped="no"/>
+                                                        <property name="label_xalign">0</property>
+                                                        <property name="shadow_type">none</property>
+                                                        <property name="obey_child">False</property>
+                                                        <child>
+                                                          <object class="GtkDrawingArea" id="privkeyDrawingarea">
+                                                            <property name="visible">True</property>
+                                                            <property name="app_paintable">True</property>
+                                                            <property name="can_focus">False</property>
+                                                            <signal name="draw" handler="on_privkeyDrawingarea_draw" swapped="no"/>
+                                                          </object>
+                                                        </child>
                                                       </object>
                                                     </child>
                                                   </object>
@@ -1415,6 +1435,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="hexpand">True</property>
+                            <property name="expanded">True</property>
                             <child>
                               <object class="GtkViewport" id="consoleViewport">
                                 <property name="visible">True</property>
@@ -1501,10 +1522,10 @@
     <property name="border_width">5</property>
     <property name="type_hint">dialog</property>
     <property name="program_name">MandelBrat</property>
-    <property name="copyright" translatable="yes">Copyright © 2010-2013 Joseph E. Edwards VIII</property>
+    <property name="copyright" translatable="yes">GNU/GPL3.0 by Joseph E. Edwards VIII</property>
     <property name="comments" translatable="yes">Mandelbrot Set Crypto Explorer</property>
     <property name="website">https://github.com/joseph8th/mandelbrat</property>
-    <property name="website_label" translatable="yes">GOTO MandelBrat Website</property>
+    <property name="website_label" translatable="yes">MandelBrat Website</property>
     <property name="license" translatable="yes">Open source. Feel free to distribute and modify as long as you give credit to the author.</property>
     <property name="authors">Joseph E. Edwards VIII</property>
     <property name="logo">mbrat.png</property>

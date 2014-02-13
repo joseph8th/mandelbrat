@@ -1,8 +1,26 @@
-[poolkey]
-iters = 100
-mpoint = (-1.0000000000000000000000000000008e-03 1.0000000000000000000000000000008e-03)
-name = skelpoolkey
+[mhash]
 prec = 100
+
+[poolkey]
+info = Public Pool-Key. Use 'poolkey --set' to alter properties.
+real = -0.001
+name = skelpoolkey
+ix = 
+imag = 0.001
+iy = 
+pool = skelpool
+
+[pool]
+info = Point Pool. Use 'pool --set' to alter properties.
+name = skelpool
+iters = 100
+image = 
+x_lo = -2.25
+y_hi = 1.25
+cmap = bw
+ppu = 96
+y_lo = -1.25
+x_hi = 1.0
 
 [signature]
 hash_sig = (-1.5649082480381915034478507455718e-1071 5.5681619058103090180780454632179e-1071)

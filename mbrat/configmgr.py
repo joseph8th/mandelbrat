@@ -106,11 +106,14 @@ class SecManager(object):
 
     # secondary accessors/mutators
 
-    def get_as_args(self, subsection=None):
+    def get_as_args(self, subsection=None, return_dict=False):
         if subsection:
             self.set_section_to(subsection)
         self.read()
         arg_d = arglist_parse_to_dict(self.items())
+
+        if return_dict:
+            return arg_d
 
         return Arguments(arg_d)
         
@@ -193,7 +196,11 @@ class ConfigManager(object):
 
 
     def _init_section_managers(self, profilename):
+
+        # user 'mbrat' preferences esp for GUI
         self.usrmgr = SecManager('prefs', self.usrcfg['cfgf'])
+
+        # 'usr/' tree configs
         self._init_profile(profilename)
         self.secmgr = {
             'profile': SecManager('profile', self.profile_cfg),

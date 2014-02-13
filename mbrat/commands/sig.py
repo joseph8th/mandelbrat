@@ -1,7 +1,7 @@
 from os import path
 import gmpy2
 from gmpy2 import mpfr, mpc
-from ConfigParser import RawConfigParser
+import ConfigParser
 
 from mbrat.commander import Command
 from mbrat.configmgr import ConfigManager
@@ -39,7 +39,7 @@ class SigCommand(Command):
         # instantiate a ConfigManager
         self.cfgmgr = ConfigManager()
         self.config = self.cfgmgr.secmgr['profile']
-        self.cfgparser = RawConfigParser()
+        self.cfgparser = ConfigParser.RawConfigParser()
 
         # get needed configs
         self.privkey_cfg = self.cfgmgr.secmgr['privkey']
@@ -97,6 +97,14 @@ class SigCommand(Command):
 
         self.cfgparser.read(path.abspath(sig_cfgf))
 
+        # set precision try
+        try:
+            prec = self.cfgparser.getint('poolkey', 'prec')
+        except ConfigParser.NoOptionError:
+            return None
+
+        gmpy2.get_context().precision = prec
+
         # check to see if the poolkey already exists, else create it
 #        sig_pool = 
 
@@ -104,11 +112,10 @@ class SigCommand(Command):
         for sec in self.cfgparser.sections():
             if sec == 'poolkey':
                 sig_d[sec] = { 'name': self.cfgparser.get(sec, 'name'), 
-                               'prec': self.cfgparser.getint(sec, 'prec'),
+                               'prec': prec,
                                'iters': self.cfgparser.getint(sec, 'iters'),
-                               'mpoint': mpc( self.cfgparser.get(sec, 'mpoint'), 
-                                              precision=sig_d[sec][prec] ),
-                                   }
+                               'mpoint': mpc( self.cfgparser.get(sec, 'mpoint') ),
+                               }
             elif sec == 'signature':
                 hash_sig_s = self.cfgparser.get(sec, 'hash_sig')
                 sig_d[sec] = { 'hash_sig': [mpc(pt) for pt in hash_sig_s.split('\n')] }
@@ -136,6 +143,7 @@ class SigCommand(Command):
 
         # set the precision
         args.spi['prec'] = int(self.privkey_cfg.get('prec'))
+
         gmpy2.get_context().precision = args.spi['prec']
 
         # format the keys for mpc
@@ -145,16 +153,13 @@ class SigCommand(Command):
         ######## sign the hash ########
         hash_sig = spi.run(args)
 
-        # init a ConfigParser compat dict
-        sig_d = {
-            'pool':      { 'name': self.pool_cfg.get('name'), 
-                           },
-            'poolkey':   { 'name': self.poolkey_cfg.get('name'),
-                           'prec': args.spi['prec'], 
-                           'iters': self.pool_cfg.get('iters'),
-                           'mpoint': args.spi['poolkey'], },
-            'signature': { 'hash_sig': hash_sig, },
-            }
+        # init a ConfigParser compat dict with a top-section of 'mhash'
+        sig_d = {'mhash': {'prec': args.spi['prec']}}
+
+        for sec in ['pool', 'poolkey']:
+            sig_d[sec] = self.cfgmgr.secmgr[sec].get_as_args(subsection=sec, return_dict=True)
+
+        sig_d['signature'] = { 'hash_sig': hash_sig }        # add hash_sig
 
         # return a dict if desired ...
         if return_dict:
@@ -189,13 +194,16 @@ class SigCommand(Command):
 
         # read the .mbrat config file
         their_sig = self._read_sig_config(args.valid)
+
+        if not their_sig:
+            return False
 #############33
         print their_sig
 
         # then mhash the plaintext for comparison
         my_sig = self.run_sign(args, return_dict=True)
 #############33
-        print their_sig
+        print my_sig
 
 
         # setup the args.spi

@@ -8,7 +8,7 @@ MBrat core settings
 """
 
 MBRAT_PROG = 'mbrat'
-MBRAT_VER = '0.1h'
+MBRAT_VER = '0.2'
 
 MBRAT_PYVER = 'python2.7'
 
