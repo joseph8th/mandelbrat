@@ -3,6 +3,8 @@ import cairo
 from math import pi
 from gi.repository import Gtk
 
+
+from mbrat.lib.mscreen import PyMScreen
 from mbrat.util import Arguments, clogger
 from mbrat.mutil import mpoint_pick_random
 from mbrat.settings import MBRAT_GUI_POOL_TYPE_L as POOL_TYPE_L
@@ -27,8 +29,6 @@ class MScreenTabs(object):
 
     def _init_tabs(self):
 
-        from mbrat.lib.mscreen import PyMScreen
-
         self.tab = POOL_TYPES
 
         for pool_t in POOL_TYPES.keys():
@@ -38,7 +38,7 @@ class MScreenTabs(object):
             # set MScreen for the tab...
             self.tab[pool_t]['mset'] = PyMScreen()
 
-            # init DAreas...
+            # init GTK DAreas...
             self.tab[pool_t]['da'] = self.builder.get_object(
                 "{}Drawingarea".format(pool_t)
                 )
@@ -92,6 +92,8 @@ class MScreenTabs(object):
 
     def on_draw(self, pool_t, cr):
         """ Draw method for any given DrawingArea and target tab ('pool type'). """
+
+
 
         cr.set_source_surface( self.tab[pool_t]['ims'], 0, 0 )
         cr.paint()
