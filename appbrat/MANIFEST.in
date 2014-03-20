@@ -1,0 +1,4 @@
+recursive-include appbrat/public *
+include appbrat/public/favicon.ico
+recursive-include appbrat/i18n *
+recursive-include appbrat/templates *
