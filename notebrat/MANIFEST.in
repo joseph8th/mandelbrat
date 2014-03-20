@@ -1,4 +1,0 @@
-recursive-include notebook/public *
-include notebook/public/favicon.ico
-recursive-include notebook/i18n *
-recursive-include notebook/templates *

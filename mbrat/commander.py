@@ -41,7 +41,8 @@ class ConfigCommand(object):
                                             description = self.description, 
                                             help = self.help)
 
-        self.group = self.parser.add_mutually_exclusive_group()
+        self.group = self.parser.add_argument_group("{} group".format(self.name), 
+                                                    "generic configuration".format(self.name))
         self.group.add_argument( 
             "--ls", action='store_true',
             help="list available {}(s)".format(self.name) )
@@ -55,6 +56,8 @@ class ConfigCommand(object):
                                  help="checkout the given {}".format(self.name) )
         self.group.add_argument( "--set", nargs='*',
                                  help="set current {} config properties".format(self.name) )
+
+        ### TODO: add DB support instead of all but keys (which remain file-based)
 
         # instantiate a ConfigManager and set 'config' attr to manage this section 
         self.cfgmgr = ConfigManager()
