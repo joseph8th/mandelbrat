@@ -3,4 +3,5 @@
 PYVER=python2.7
 WHICH_PY=`which $PYVER`
 
+[ -z $WHICH_PY ] && echo "Required '${PYVER}' not installed!" && exit 1
 [ -e "./mbrat_install.py" ] && $PYVER mbrat_install.py $@ || exit 1

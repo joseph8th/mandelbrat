@@ -93,9 +93,69 @@ class SigCommand(Command):
             self.cfgparser.write(configfile)
 
 
-    def _read_sig_config(self, sig_cfgf):
+    def run_sign(self, args, return_dict=False):
+        """ 
+        Method to sign a hash of a given file, returning either True or a dict if return_dict==True.
+        """
 
+        from mbrat.spi.sign import SignSPI
+        spi = SignSPI(mandelfun)
+
+        print "Signing '{0}' with profile '{1}:{2}' and pool '{3}:{4}' ...".format(
+            args.file, self.config.get('name'), self.privkey_cfg.get('name'),
+            self.pool_cfg.get('name'), self.poolkey_cfg.get('name')
+            )
+
+        # put together arguments for the SPI
+        args.spi['iters'] = int(self.pool_cfg.get('iters')) + \
+            int(self.privkey_cfg.get_from_section('pool', 'iters'))
+
+        # set the precision
+        args.spi['prec'] = int(self.privkey_cfg.get('prec'))
+
+        gmpy2.get_context().precision = args.spi['prec']
+
+        # format the keys for mpc
+        args.spi['poolkey'] = mpc( self.poolkey_cfg.get('real') + " " \
+                                   + self.poolkey_cfg.get('imag') )
+        args.spi['privkey'] = mpc( self.privkey_cfg.get('real') + " " \
+                                   + self.privkey_cfg.get('imag') )
+
+        ######## sign the hash ########
+        hash_sig = spi.run(args)
+
+        # init a ConfigParser compat dict with a top-section of 'mhash'
+        sig_d = {'mhash': {'prec': args.spi['prec']}}
+
+        for sec in ['pool', 'poolkey']:
+            sig_d[sec] = self.cfgmgr.secmgr[sec].get_as_args(
+                subsection=sec, return_dict=True)
+
+        sig_d['signature'] = { 'hash_sig': hash_sig }        # add hash_sig
+
+        # return a dict if desired ...
+        if return_dict:
+            return sig_d
+
+        # ... or get the filename for the signature 'BASENAME.mbrat' file
+        sig_cfgf = path.splitext(path.basename(args.file))[0] + ".mbrat"
+        sig_cfgf = path.join( path.dirname(path.abspath(args.file)), 
+                              sig_cfgf )
+
+        self._write_sig_config(sig_d, sig_cfgf)
+
+        return True
+
+
+    ## VALIDATION section ##
+
+    def _read_sighash_config(self, sig_cfgf):
+
+        # get pool/poolkey config from given .mbrat file
         self.cfgparser.read(path.abspath(sig_cfgf))
+
+        print path.abspath(sig_cfgf)
+
 
         # set precision try
         try:
@@ -123,57 +183,6 @@ class SigCommand(Command):
         return sig_d
 
 
-
-    def run_sign(self, args, return_dict=False):
-        """ 
-        Method to sign a hash of a given file, returning either True or a dict if return_dict==True.
-        """
-
-        from mbrat.spi.sign import SignSPI
-        spi = SignSPI(mandelfun)
-
-        print "Signing '{0}' with profile '{1}:{2}' and pool '{3}:{4}' ...".format(
-            args.file, self.config.get('name'), self.privkey_cfg.get('name'),
-            self.pool_cfg.get('name'), self.poolkey_cfg.get('name')
-            )
-
-        # put together arguments for the SPI
-        args.spi['iters'] = int(self.pool_cfg.get('iters')) + \
-            int(self.privkey_cfg.get_from_section('pool', 'iters'))
-
-        # set the precision
-        args.spi['prec'] = int(self.privkey_cfg.get('prec'))
-
-        gmpy2.get_context().precision = args.spi['prec']
-
-        # format the keys for mpc
-        args.spi['poolkey'] = mpc( self.poolkey_cfg.get('real') + " " + self.poolkey_cfg.get('imag') )
-        args.spi['privkey'] = mpc( self.privkey_cfg.get('real') + " " + self.privkey_cfg.get('imag') )
-
-        ######## sign the hash ########
-        hash_sig = spi.run(args)
-
-        # init a ConfigParser compat dict with a top-section of 'mhash'
-        sig_d = {'mhash': {'prec': args.spi['prec']}}
-
-        for sec in ['pool', 'poolkey']:
-            sig_d[sec] = self.cfgmgr.secmgr[sec].get_as_args(subsection=sec, return_dict=True)
-
-        sig_d['signature'] = { 'hash_sig': hash_sig }        # add hash_sig
-
-        # return a dict if desired ...
-        if return_dict:
-            return sig_d
-
-        # ... or get the filename for the signature 'BASENAME.mbrat' file
-        sig_cfgf = path.splitext(path.basename(args.file))[0] + ".mbrat"
-        sig_cfgf = path.join( path.dirname(path.abspath(args.file)), sig_cfgf )
-
-        self._write_sig_config(sig_d, sig_cfgf)
-
-        return True
-
-
     def run_valid(self, args):
         """
         Validate a given file using a given '.mbrat' signature config file.
@@ -184,20 +193,21 @@ class SigCommand(Command):
 
         if not args.valid:
             sig_cfgf = path.splitext(path.basename(args.file))[0] + ".mbrat"
-            args.valid = path.join( path.dirname(path.abspath(args.file)), sig_cfgf )
+            args.valid = path.join( path.dirname(path.abspath(args.file)), 
+                                    sig_cfgf )
 
-        print "Validating '{0}'\n  -> Using received signed hash: {1} ...".format(args.file, args.valid)
+        print "Validating '{0}'\n  -> With received signed hash: {1} ...".format(args.file, args.valid)
 
         # first read THEIR signed hash '*.mbrat' and deal with it
         if not path.splitext(path.basename(args.valid))[1] == '.mbrat':
             return False
 
-        # read the .mbrat config file
-        their_sig = self._read_sig_config(args.valid)
+        their_sig = self._read_sighash_config(args.valid)
 
         if not their_sig:
+            print "Error: unable to read: {}".format(args.valid)
             return False
-#############33
+
         print their_sig
 
         # then mhash the plaintext for comparison
