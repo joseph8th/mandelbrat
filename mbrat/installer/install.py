@@ -5,17 +5,17 @@ from shutil import copy2, copytree, rmtree, ignore_patterns, Error
 from mbrat.util import execSubproc, mb_mkdirs
     
 from mbrat.configmgr import ConfigManager
-from mbrat.settings import MBRAT_PROG, MBRAT_VER, MBRAT_PYD, MBRAT_PYVER, MBRAT_CONFD, \
-    MBRAT_LIB_SRCD, MBRAT_LIB_OBJN_L, MBRAT_LIB_OBJEXT, MBRAT_HOME_USRD, MBRAT_CFG_TYPE_L, \
-    MBRAT_ETCD, MBRAT_CMDF
+from mbrat.settings import MBRAT_PROG, MBRAT_VER, MBRAT_PYD, MBRAT_PYVER, \
+    MBRAT_CONFD, MBRAT_LIB_SRCD, MBRAT_LIB_OBJN_L, MBRAT_LIB_OBJEXT, \
+    MBRAT_HOME_USRD, MBRAT_CFG_TYPE_L, MBRAT_ETCD, MBRAT_CMDF
 
 
 def _install_usrd():
     
-    print "Installing 'usr' configuration tree to\n  -> {}".format(MBRAT_HOME_USRD)
+    print "Installing 'usr' configuration to\n  -> %s" % (MBRAT_HOME_USRD)
 
     if path.exists(MBRAT_HOME_USRD):
-        print "Nothing to do. Directory already exists.".format(MBRAT_HOME_USRD)
+        print "Nothing to do. Directory already exists."
         return False
 
     # ... and use ConfigManager to do the rest

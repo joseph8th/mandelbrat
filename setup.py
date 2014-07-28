@@ -1,9 +1,8 @@
 from distutils.core import setup, Extension
 #from setuptools import setup, find_packages, Extension
 
-from os import path
+#from os import path
 from mbrat.settings import MBRAT_PROG, MBRAT_VER
-
 
 # C/++ extension modules
 mpointc_module = Extension(
@@ -24,11 +23,18 @@ setup(
     author_email = 'joseph8th@notroot.us',
     url = 'https://github.com/joseph8th/mandelbrat',
 
-#    packages = find_packages(),
-#    scripts = ['install'],
-#    install_requires = REQUIREMENTS,
-    ext_modules = [mpointc_module],
-
+    scripts = ['pacbrat', 'mbrat.py'],
     packages = ['mbrat', 'mbrat.commands', 'mbrat.spi', 
-                'mbrat.mbrat_gui', 'mbrat.lib', 'mbrat.lib.mpoint',],
+                'mbrat.mbrat_gui', 'mbrat.lib'],
+    data_files=[ ('etc',
+                  ['etc/mbrat', 'etc/mbrat.png', 'etc/mbrat.xcf.bz2']),
+                 ('pacbrat.d',
+                  ['pacbrat.d/pacbrat.cfg', 'pacbrat.d/pacbrat_custom.sh', 
+                   'pacbrat.d/pyenv.sh', 'pacbrat.d/util.sh']),
+                 ('pacbrat.d/bash_ini_parser',
+                  ['pacbrat.d/bash_ini_parser/read_ini.sh']), ]
+
+#    packages = find_packages(),
+#    install_requires = REQUIREMENTS,
+#    ext_modules = [mpointc_module],
 )

@@ -1,19 +1,21 @@
 import os
 from os import path
 
+from mbrat.define import MBRAT_PROG, MBRAT_VER, MBRAT_PYVER, \
+    DEF_COMMANDD, DEF_ROOTD, DEF_MAINF, DEF_USRD, DEF_CONFD
 
 """
 MBrat core settings
 
 """
 
-MBRAT_PROG = 'mbrat'
-MBRAT_VER = '0.2'
+#MBRAT_PROG = PROG
+#MBRAT_VER = PROG_VER
+#MBRAT_PYVER = PYTHON_SHORT_VER
 
-MBRAT_PYVER = 'python2.7'
-
-MBRAT_ROOT = os.getcwd()
-MBRAT_CONFD = path.join(os.environ['HOME'], ".{}".format(MBRAT_PROG))
+MBRAT_ROOT = os.getcwd() if os.getcwd() != DEF_ROOTD else DEF_ROOTD
+MBRAT_CONFD = path.join(os.environ['HOME'], '.config', MBRAT_PROG) \
+              if not path.exists(DEF_CONFD) else DEF_CONFD
 MBRAT_HOME = MBRAT_ROOT
 #MBRAT_ROOT if not path.exists(MBRAT_CONFD) else MBRAT_CONFD
 
@@ -26,7 +28,7 @@ def _get_bin():
     else:
         return '/usr/bin'
 
-MBRAT_BIND = _get_bin()
+MBRAT_BIND = _get_bin() if not path.exists(DEF_COMMANDD) else DEF_COMMANDD
 MBRAT_CMDF = path.join(MBRAT_BIND, MBRAT_PROG)
 
 # needed during installation to $HOME but will work for standalone clone too
@@ -36,9 +38,11 @@ MBRAT_LIB_OBJEXT = 'so'
 
 MBRAT_PYD = path.join(MBRAT_HOME, 'mbrat')
 
-MBRAT_ROOT_USRD = path.join(MBRAT_HOME, 'usr')
-MBRAT_HOME_USRD = path.join(os.environ['HOME'], '.config', MBRAT_PROG, 'usr')
-MBRAT_USRD = MBRAT_HOME_USRD if path.exists(MBRAT_HOME_USRD) else MBRAT_ROOT_USRD
+MBRAT_ROOT_USRD = path.join(MBRAT_HOME, 'usr') \
+                  if not path.exists(DEF_USRD) else DEF_USRD
+MBRAT_HOME_USRD = path.join(MBRAT_CONFD, 'usr')
+MBRAT_USRD = MBRAT_HOME_USRD \
+             if path.exists(MBRAT_HOME_USRD) else MBRAT_ROOT_USRD
 MBRAT_USR_CFGF = path.join(MBRAT_USRD, 'usr.cfg')
 MBRAT_POOLSD = path.join(MBRAT_USRD, 'pools')
 MBRAT_PROFILESD = path.join(MBRAT_USRD, 'profiles')

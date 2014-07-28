@@ -3,9 +3,10 @@ from os import path
 import ConfigParser
 
 from mbrat.util import Arguments, arglist_parse_to_dict, mb_mkdirs, clogger
-from mbrat.settings import MBRAT_USRD, MBRAT_USR_CFGF, MBRAT_POOLSD, MBRAT_PROFILESD, \
-    MBRAT_CURRENTL, MBRAT_DEF_POOL_D, MBRAT_DEF_POOLKEY_D, MBRAT_DEF_PRIVKEY_D, MBRAT_DEF_USR_D, \
-    MBRAT_TMPD, MBRAT_TMPF, MBRAT_CFG_TYPE_L, MBRAT_CFG_DEPTREE_D
+from mbrat.settings import MBRAT_USRD, MBRAT_USR_CFGF, MBRAT_POOLSD, \
+    MBRAT_PROFILESD, MBRAT_CURRENTL, MBRAT_DEF_POOL_D, MBRAT_DEF_POOLKEY_D, \
+    MBRAT_DEF_PRIVKEY_D, MBRAT_DEF_USR_D, MBRAT_TMPD, MBRAT_TMPF, \
+    MBRAT_CFG_TYPE_L, MBRAT_CFG_DEPTREE_D
 
 
 class SecManager(object):
@@ -157,37 +158,44 @@ class ConfigManager(object):
         """ Method to check dir tree structure and config file integrity. """
 
         # make sure 'usr' dir tree is intact & create anew if not
-        for d in [self.usrcfg['path'], self.tmpcfg['path'], self.poolsd, self.profilesd]:
+        for d in [self.usrcfg['path'],
+                  self.tmpcfg['path'],
+                  self.poolsd,
+                  self.profilesd]:
+
             if not path.exists(d):
                 if not mb_mkdirs(d):
-                    return self._err("==> ERROR: Unable to create '{}'".format(d) )
-                self._log("==> Created new directory at\n  -> {}".format(d) )
+                    return self._err("==> ERROR: Unable to create '%s'" % (d) )
+                self._log("==> Created new directory at\n  -> %s" % (d) )
 
-        # make sure '.cfg' files exist for 'usr', 'tmp' and 'skel*' & make if not
+        # make sure '.cfg' files exist for 'usr', 'tmp' and 'skel*', else make
         if not path.isfile( self.usrcfg['cfgf'] ):
             prop_d = MBRAT_DEF_USR_D.copy()
             self.usrmgr = SecManager('prefs', self.usrcfg['cfgf'])
             self.usrmgr.set_configf( self.usrcfg['cfgf'] )
             self.usrmgr.set_write( prop_d['prefs'] )
-            self._log("==> Created new usr.cfg at\n  -> {}".format(self.usrcfg['cfgf']) )
+            self._log("==> Created new usr.cfg at\n  -> %s" %
+                      (self.usrcfg['cfgf']) )
 
         if not path.isfile( self.tmpcfg['cfgf'] ):
             self.secmgr['tmp'] = SecManager('tmp', self.tmpcfg['cfgf'])
             self._mkcfg_tmp()
-            self._log("==> Created new tmp.cfg at\n  -> {}".format(self.tmpcfg['cfgf']) )
+            self._log("==> Created new tmp.cfg at\n  -> %s" %
+                      (self.tmpcfg['cfgf']) )
 
-        # skel* and _current sanity - iters over [pool, poolkey, profile, privkey,..]
+        # skel* and _current sanity iters [pool, poolkey, profile, privkey,..]
         for cfg_t in [t for t in MBRAT_CFG_TYPE_L if t != 'pubkey']:
             cfgname = "skel{}".format(cfg_t)
             cfg_parentd = self.get_cfg_parentd(cfg_t)
-            configf = path.join( cfg_parentd, cfgname, "{}.cfg".format(cfgname) )
+            configf = path.join( cfg_parentd, cfgname, "%s.cfg" % (cfgname) )
             cfg_l = os.listdir(cfg_parentd)
 
             if not cfgname in cfg_l:
                 self.secmgr[cfg_t] = SecManager( cfg_t, configf )
                 self.make_config( cfg_t, cfgname, update=False, current=False )
                 self._log(
-                    "==> Created skeleton '{0}' config at\n  -> {1}".format(cfg_t, configf)
+                    "==> Created skeleton '%s' config at\n  -> %s"
+                    % (cfg_t, configf)
                 )
 
             if not MBRAT_CURRENTL in cfg_l:
@@ -250,7 +258,10 @@ class ConfigManager(object):
 
     def set_current_cfg(self, targetd, configf, update=True):
         """
-        Set '_current' configf for any target directory. Doesn't use SecManager. """
+        Set '_current' configf for any target directory.
+        Doesn't use SecManager.
+
+        """
 
         current_cfg = os.path.join( targetd, MBRAT_CURRENTL )
         try:
@@ -266,8 +277,8 @@ class ConfigManager(object):
 
     def set_current_cfg_by_name(self, cfg_t, cfgname):
         """
-        Set '_current' configf by top-section and name. Uses SecManager methods. 
-        Cascades dependencies to set correct current config in 'child' SecManager(s).
+        Set '_current' configf by top-section and name. Uses SecManager. 
+        Cascades dependencies to set current config in 'child' SecManager(s).
         For example: set 'profile' -> set ['privkey', 'pubkey'] 
 
         """
@@ -322,15 +333,19 @@ class ConfigManager(object):
         elif cfg_t == 'pool':
             return self.poolsd
         elif cfg_t == 'poolkey':
-            return path.join( self.get_current_cfg('pool', dironly=True), 'data' )
+            return path.join( self.get_current_cfg('pool', dironly=True),
+                              'data' )
         elif cfg_t == 'profile':
             return self.profilesd
         elif cfg_t == 'privkey':
-            return path.join( self.get_current_cfg('profile', dironly=True), 'data' )
+            return path.join( self.get_current_cfg('profile', dironly=True),
+                              'data' )
         elif cfg_t == 'pubkey':
-            return path.join( self.get_current_cfg('profile', dironly=True), 'public' )
+            return path.join( self.get_current_cfg('profile', dironly=True),
+                              'public' )
         elif cfg_t == 'privpub':
-            return path.join( self.get_current_cfg('privkey', dironly=True), 'public' )
+            return path.join( self.get_current_cfg('privkey', dironly=True),
+                              'public' )
 
 
     # special private function to make the temp configf
@@ -391,11 +406,12 @@ class ConfigManager(object):
         if not path.exists(pri_pubkeyf):
             return self._err( "==> ERROR: pubkey '%s' not found." % (cfgname) )
 
-        # each profile has a 'public' dir with PUBLIC pubkey links and _current ln
+        # each profile has 'public' dir with PUBLIC pubkey ln and _current ln
         pub_pubd = self.get_cfg_parentd('pubkey')
         pub_pubkeyf = path.join( pub_pubd, "{}.cfg".format(cfgname) )
         if path.exists( pub_pubkeyf ):
-            return self._err( "==> ERROR: pubkey '%s' already exists." % (cfgname) )
+            return self._err( "==> ERROR: pubkey '%s' already exists." %
+                              (cfgname) )
 
         # symlink the private pubkey .cfg into profile's 'public' dir
         os.symlink( pri_pubkeyf, pub_pubkeyf )
@@ -424,14 +440,20 @@ class ConfigManager(object):
 
         elif cfg_t == 'profile':
             prop_d = { cfg_t: {'info': "", 'name': cfgname,}, }
-            args = self._mkcfg_args( cfgname, self.profilesd, ['data', 'public',], prop_d )
+            args = self._mkcfg_args( cfgname,
+                                     self.profilesd,
+                                     ['data', 'public',],
+                                     prop_d )
 
         elif cfg_t == 'privkey':
             targetd = self.get_cfg_parentd(cfg_t)
             prop_d = MBRAT_DEF_PRIVKEY_D.copy()
             prop_d[cfg_t].update( {'name': cfgname,} )
             prop_d['pool'].update( {'name': "{}_pool".format(cfgname),} )
-            args = self._mkcfg_args( cfgname, targetd, ['public',], prop_d )
+            args = self._mkcfg_args( cfgname,
+                                     targetd,
+                                     ['public',],
+                                     prop_d )
 
         elif cfg_t == 'pubkey':
             return self._mkcfg_pubkey(cfgname, update, current)
@@ -464,7 +486,8 @@ class ConfigManager(object):
         return cur_poolf
 
     def get_current_poolkey_cfg(self, dironly=False):
-        pool_datad = path.join( self.get_current_pool_cfg(dironly=True), 'data' )
+        pool_datad = path.join( self.get_current_pool_cfg(dironly=True),
+                                'data' )
         pool_datal = path.join( pool_datad, MBRAT_CURRENTL )
         if path.exists(pool_datal):
             pool_dataf = path.join( pool_datad, os.readlink(pool_datal) )
@@ -482,7 +505,8 @@ class ConfigManager(object):
         return cur_profilef
 
     def get_current_data_cfg(self, dironly=False):
-        usr_datad = path.join( self.get_current_profile_cfg(dironly=True), 'data' )
+        usr_datad = path.join( self.get_current_profile_cfg(dironly=True),
+                               'data' )
         cur_datal = path.join( usr_datad, MBRAT_CURRENTL )
         if path.exists(cur_datal):
             dataf = path.join( usr_datad, os.readlink(cur_datal) )
@@ -493,7 +517,8 @@ class ConfigManager(object):
         return dataf
 
     def get_current_pubkey_cfg(self, dironly=False):
-        usr_pubd = path.join( self.get_current_profile_cfg(dironly=True), 'public' )
+        usr_pubd = path.join( self.get_current_profile_cfg(dironly=True),
+                              'public' )
         cur_publ = path.join( usr_pubd, MBRAT_CURRENTL )
         if path.exists(cur_publ):
             pubkeyf = path.join( usr_pubd, os.readlink(cur_publ) )
