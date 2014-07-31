@@ -126,7 +126,7 @@ function _run_shdelete {
 # help function
 function _run_help {
     echo "usage: ${SCRIPT} [-h | -i | -r | -u | -d]"
-    printf "See 'README.md' for more information."
+    printf "See 'README.md' for more information.\n"
 }
 
 
