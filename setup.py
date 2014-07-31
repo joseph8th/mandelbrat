@@ -26,13 +26,14 @@ setup(
     scripts = ['pacbrat', 'mbrat.py'],
     packages = ['mbrat', 'mbrat.commands', 'mbrat.spi', 
                 'mbrat.mbrat_gui', 'mbrat.lib'],
-    data_files=[ ('etc',
-                  ['etc/mbrat', 'etc/mbrat.png', 'etc/mbrat.xcf.bz2']),
-                 ('pacbrat.d',
-                  ['pacbrat.d/pacbrat.cfg', 'pacbrat.d/pacbrat_custom.sh', 
-                   'pacbrat.d/pyenv.sh', 'pacbrat.d/util.sh']),
-                 ('pacbrat.d/bash_ini_parser',
-                  ['pacbrat.d/bash_ini_parser/read_ini.sh']), ]
+    data_files=[
+        ('etc',
+         ['etc/mbrat', 'etc/mbrat.png', 'etc/mbrat.xcf.bz2']),
+        ('pacbrat.d',
+         ['pacbrat.d/pacbrat.cfg', 'pacbrat.d/pacbrat_custom.sh', 
+          'pacbrat.d/pyenv.sh', 'pacbrat.d/util.sh',
+          'pacbrat.d/read_ini.sh', 'pacbrat.d/gmp.sh']), 
+    ]
 
 #    packages = find_packages(),
 #    install_requires = REQUIREMENTS,
