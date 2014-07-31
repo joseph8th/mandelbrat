@@ -11,7 +11,7 @@ PYENV_DEF_VENVD=/home/${USER}/.pyenv/versions
 
 
 # Configure the user's shell script if they want.
-function _config_shrc_pyenv {
+function config_shrc_pyenv {
 
     echo; read -p "Configure 'pyenv' for your shell? [y/N]: "
     if [[ "$REPLY" != "y" ]]; then
@@ -54,7 +54,7 @@ function _config_shrc_pyenv {
 
 
 # Check if 'pyenv' and plugins are installed and if not, install.
-function _check_req_pyenv {
+function check_req_pyenv {
 
     # see if pyenv already installed and return if so
     #search_path "$PYENV_DEF_ROOTD"
@@ -65,12 +65,12 @@ function _check_req_pyenv {
     if [ -e "$PYENV_DEF_ROOTD" ]; then
         echo "==> ERROR: 'pyenv' installed but not configured."
         echo "Did you read the 'README.md' in '${PYENV_DEF_ROOTD}'?"
-        _config_shrc_pyenv
+        config_shrc_pyenv
 	_err; return
     fi
 
     # good to install here ...
-    echo "==> This version of PyBrat requires 'pyenv'."
+    printf "\n==> This version of PyBrat requires 'pyenv'.\n"
     read -p "Use 'git' to clone and install 'pyenv' to defaults? [y/N]: "
     [[ "$REPLY" != "y" ]] && _err && return
     
@@ -82,14 +82,15 @@ function _check_req_pyenv {
 	_err; return
     fi
     echo
-    git clone git://github.com/yyuu/pyenv-virtualenv.git ${PYENV_DEF_ROOTD}/plugins/pyenv-virtualenv
+    git clone git://github.com/yyuu/pyenv-virtualenv.git \
+        ${PYENV_DEF_ROOTD}/plugins/pyenv-virtualenv
     if [ ! -e "${PYENV_DEF_ROOTD}/plugins/pyenv-virtualenv" ]; then
         echo "==> ERROR: 'pyenv-virtualenv' did not install correctly."
 	_err; return
     fi
 
     # config user's shell
-    _config_shrc_pyenv
+    config_shrc_pyenv
     return
 }
 

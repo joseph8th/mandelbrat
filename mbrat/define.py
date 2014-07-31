@@ -1,0 +1,8 @@
+MBRAT_PROG='mbrat'
+MBRAT_VER='0.1i'
+MBRAT_PYVER='2.7'
+DEF_COMMANDD='/usr/local/bin'
+DEF_ROOTD='/home/notroot/.mbrat'
+DEF_MAINF='/home/notroot/.mbrat/mbrat.py'
+DEF_USRD='/home/notroot/.mbrat/usr'
+DEF_CONFD='/home/notroot/.config/mbrat'

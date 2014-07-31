@@ -13,12 +13,26 @@ SCRIPT=`basename $0`
 
 source ./${SCRIPT}.d/util.sh                      # source search_path
 source ./${SCRIPT}.d/bash_ini_parser/read_ini.sh  # source bash cfg parser
-read_ini ./${SCRIPT}.d/${SCRIPT}.cfg -p CFG       # read python-compatible INI
+read_ini ./${SCRIPT}.d/${SCRIPT}.cfg -p CFG       # read python-compat INI
+PROG=$CFG__PROG__PROG                             # set $PROG from .cfg
 
-# custom install/uninstall functions
-if [ -e ./${SCRIPT}.d/${SCRIPT}_custom.sh ]; then
-    source ./${SCRIPT}.d/${SCRIPT}_custom.sh
+# Error logging
+function _err {
+    let NOERR=NOERR+1
+}
+function _printerr {
+    echo "==> ERROR (${NOERR}): try after fixing (${NOERR}) problems."
+}
+
+# custom install/uninstall functions rely on customizable paths
+if [ -e ./${SCRIPT}.d/${SCRIPT}_install.sh ]; then
+    source ./${SCRIPT}.d/${SCRIPT}_install.sh
+else
+    _err; _printerr; exit $NOERR
 fi
+
+[ -e ./${SCRIPT}.d/${SCRIPT}_custom.sh ] && \
+    source ./${SCRIPT}.d/${SCRIPT}_custom.sh
 
 # split $PATH for search_path function
 OLDIFS=$IFS
@@ -31,26 +45,19 @@ END
 
 IFS=$OLDIFS
 
-# Error logging
-function _err {
-    let NOERR=NOERR+1
-}
-
-function _printerr {
-    echo "==> ERROR (${NOERR}): try after fixing (${NOERR}) problems."
-}
-
 
 #### Command line option functions. ####
 
 # shell based installer
 function _run_shinstall {
 
-    echo "Installing '${CFG__PROG__PROG}' ..."
+    echo $DEF_ROOTD
+
+    echo "Installing '${PROG}' ..."
     # make sure it's not already installed correctly
-    if  [[ -e "${CFG__INSTALL__DEF_ROOTD}" ]] && \
-        [[ -e "${CFG__INSTALL__DEF_COMMANDD}/${CFG__PROG__PROG}" ]]; then
-        echo "==> ERROR: ${CFG__PROG__PROG} is installed. Uninstall first."
+    if  [[ -d "${DEF_ROOTD}" ]] && \
+        [[ -f "${DEF_COMMANDD}/${PROG}" ]]; then
+        echo "==> ERROR: ${PROG} is installed. Uninstall first."
         _err; return
     fi
 
@@ -67,9 +74,9 @@ function _run_shinstall {
     [[ "$NOERR" != "0" ]] && _err && _printerr && return
 
     # now install the user command 
-    echo "Make command '${CFG__PROG__PROG}': ${CFG__INSTALL__DEF_COMMANDD}"
-    sudo ln -s "${CFG__INSTALL__DEF_MAINF}" \
-        "${CFG__INSTALL__DEF_COMMANDD}/${CFG__PROG__PROG}"
+    echo "Make command '${PROG}': ${DEF_COMMANDD}"
+    sudo ln -s "${DEF_MAINF}" \
+        "${DEF_COMMANDD}/${PROG}"
 
 }
 
@@ -77,11 +84,11 @@ function _run_shinstall {
 # shell based uninstaller
 function _run_shuninstall {
 
-    echo "Uninstalling '${CFG__PROG__PROG}' ..."
+    echo "Uninstalling '${PROG}' ..."
 
     # make sure it's installed
-    if  [[ ! -e "${CFG__INSTALL__DEF_ROOTD}" ]] && \
-        [[ ! -e "${CFG__INSTALL__DEF_COMMANDD}/${CFG__PROG__PROG}" ]]; then
+    if  [[ ! -e "${DEF_ROOTD}" ]] && \
+        [[ ! -e "${DEF_COMMANDD}/${PROG}" ]]; then
         echo "Not installed. Nothing to do."
         return
     fi

@@ -6,7 +6,7 @@ MandelBrat (`mbrat`) is a Linux explorer for multiple-precision Mandelbrot Set p
 Note
 ----
 
-This version is NOT fully functional. Crypto functionality has not been implemented here. The crypto SPIs are being developed as standalone services for future compatibility with other crypto APIs. Expect all this in v1.0-alpha.
+This version is NOT fully functional. Crypto functionality has not been implemented here. The crypto SPIs are being developed (slowly) with an eye toward making them standalone services for future compatibility with other crypto APIs. Expect all this in v1.0.
 
 IOW, this version is a pared-down and profile-driven Mandelbrot Set explorer. Don't expect fancy graphics (yet).
 
@@ -37,20 +37,20 @@ Execute the following statements in your shell (do _not_ type the prompt, `$`) :
 
     $ git clone https://github.com/joseph8th/mandelbrat.git
     $ cd mandelbrat
-    $ ./bratman -i
+    $ ./pacbrat -i
 
 Install Help
 ------------
 
 Instead of last step above, just execute:
 
-    $ ./bratman -h
+    $ ./pacbrat -h
 
 Version Notes
 -------------
 
-- This version of `bratman` here has limited function. Future versions will be generalized and forked to a side project to allow configured deployment of Pythonic "Brats" to further enhance project deployment using standard tools.
-- This version of `mbrat` would like install a 'usr' configuration tree in your `$HOME/.config/` directory, and itself in a `$HOME/.mbrat directory`, with an executable in your `/usr/local/bin`. Don't worry... I'll fix that, soon.
+- This version of `pacbrat` here has limited function. Future versions will be generalized and forked to a side project to allow configured deployment of Pythonic "Brats" to further enhance project deployment using standard tools.
+- This version of `mbrat` would like install a 'usr' configuration tree in your `$HOME/.config/` directory, and itself in a `$HOME/.mbrat directory`, with an executable in your `/usr/local/bin`.
 
 
 Usage
@@ -69,10 +69,6 @@ To run the MandelBrat GUI, run the following command:
 
     $ mbrat gui 
 
-NOTE: if all the dependencies are satisfied, you may also run `mbrat` directly from the `mbrat.py` script in your cloned `git` directory. Handy for development:
-
-    $ ./mbrat.py -h
-
 
 Changelog
 =========
@@ -80,8 +76,7 @@ Changelog
 0.2 (2014-02-01)
 -----------------
 
-- Eliminated both C and C++ extension modules and switched to `gmpy2` Python package to interface with listed
-  required multiple-precision libraries.
+- Eliminated both C and C++ extension modules and switched to `gmpy2` Python package to interface with listed required multiple-precision libraries.
 
 0.1h (2013-10-16)
 -----------------
