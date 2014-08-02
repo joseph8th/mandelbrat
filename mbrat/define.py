@@ -1,5 +1,5 @@
 MBRAT_PROG='mbrat'
-MBRAT_VER='0.1i'
+MBRAT_VER='0.2a'
 MBRAT_PYVER='2.7'
 DEF_COMMANDD='/usr/local/bin'
 DEF_ROOTD='/home/notroot/.mbrat'

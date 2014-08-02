@@ -11,19 +11,19 @@ function run_install_gmp {
     pkg_url="https://ftp.gnu.org/gnu/gmp/${pkg_basename}.tar.bz2"
 
     # download and decompress the tarball
-    wget $pkg_url -P $TMPDIR
-    bzip2 -d "${TMPDIR}/${pkg_basename}.tar.bz2"
+    wget $pkg_url
+    bzip2 -d "${pkg_basename}.tar.bz2"
 
     # sha256 checksum the tarball
-    sha_ary=( $(sha256sum "${TMPDIR}/${pkg_basename}.tar") )
+    sha_ary=( $(sha256sum "${pkg_basename}.tar") )
     if [[ "$pkg_sha256" != "${sha_ary[0]}" ]]; then
         echo "==> Error: SHA256 checksum does not match!"
         _err; return
     fi
 
     # extract the files quietly, then attempt install
-    tar -xf "${TMPDIR}/${pkg_basename}.tar"
-    cd "${TMPDIR}/${gmp_dir}"
+    tar -xf "${pkg_basename}.tar"
+    cd "${gmp_dir}"
 
     ./configure
     [[ ! "$?" ]] && _err && return

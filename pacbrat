@@ -11,7 +11,6 @@ NOERR=0
 FIND_PATH=1
 SCRIPT=`basename $0`
 
-source ./${SCRIPT}.d/util.sh                      # source search_path
 source ./${SCRIPT}.d/read_ini.sh                  # source bash cfg parser
 read_ini ./${SCRIPT}.d/${SCRIPT}.cfg -p CFG       # read python-compat INI
 PROG=$CFG__PROG__PROG                             # set $PROG from .cfg
@@ -33,18 +32,6 @@ fi
 
 [ -e ./${SCRIPT}.d/${SCRIPT}_custom.sh ] && \
     source ./${SCRIPT}.d/${SCRIPT}_custom.sh
-
-# split $PATH for search_path function
-OLDIFS=$IFS
-
-IFS=:
-DIRS=
-read DIRS <<END
-$PATH
-END
-
-IFS=$OLDIFS
-
 
 #### Command line option functions. ####
 

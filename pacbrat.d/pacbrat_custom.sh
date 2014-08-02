@@ -5,12 +5,41 @@ CUSTOM_PREUNINSTALL=
 CUSTOM_UNINSTALL=run_custom_uninstall
 CUSTOM_POSTUNINSTALL=
 
+TMPDIR=./tmp
 
 ###################################
 #           pre-install           #
 ###################################
 
+function _install_dependencies {
+
+    # ask to install dependencies - WARNING experimental!
+    tmp_pwd="$PWD"
+    depends_ary=($CFG__REQUIRES__DEPENDS)
+
+    for dep in $depends_ary; do
+        echo "WARNING: '${dep}' is required."
+        read -p "Should '${SCRIPT}' attempt experimental install? [y/N]: "
+        [[ "$REPLY" != "y" ]] && _err && continue
+
+        # source installer script and execute 'run_install_*' function
+        [[ ! -e "${SCRIPT}.d/${dep}.sh" ]] && _err && continue
+        source ${SCRIPT}.d/${dep}.sh
+
+	# install depend packages from tmp directory
+        [[ ! -e "${TMPDIR}" ]] && mkdir "$TMPDIR"
+	cd "$TMPDIR"
+        run_install_${dep}
+        cd "$tmp_pwd"
+    done
+
+    rm -rf "$TMPDIR"
+}
+
 function run_custom_preinstall {
+
+    _install_dependencies
+
     # generate 'mbrat/define.py' based on 'pacbrat.cfg' settings
     local define_py=./${PROG}/define.py
     [ -e $define_py ] && rm $define_py
@@ -34,6 +63,7 @@ DEF_CONFD=\'${DEF_CONFD}\'\n"
 #             install             #
 ###################################
 
+# installation function - will change dirs to install dir
 function run_custom_install {
 
     # first install the package the default '~/.${PROG}' dir
@@ -49,27 +79,6 @@ function run_custom_install {
         # then change to install root dir
         cd ${DEF_ROOTD}
     fi
-
-    # ask to install dependencies - WARNING experimental!
-    local tmp_pwd="$PWD"
-    local depends_ary=($CFG__REQUIRES__DEPENDS)
-    for dep in $depends_ary; do
-        echo "WARNING: '${dep}' is required."
-        read -p "Should '${SCRIPT}' attempt experimental install? [y/N]: "
-        [[ "$REPLY" != "y" ]] && _err && continue
-
-        # source installer script and execute 'run_install_*' function
-        TMPDIR=./tmp
-        [[ ! -e "${TMPDIR}" ]] && mkdir $TMPDIR
-        [[ ! -e "${SCRIPT}.d/${dep}.sh" ]] && _err && continue
-        source ${SCRIPT}.d/${dep}.sh
-        run_install_${dep}
-
-        # switch back to working directory before continuing
-        cd "$tmp_pwd"
-    done
-
-    [[ "$NOERR" != "0" ]] && return
 }
 
 
@@ -78,7 +87,7 @@ function run_custom_install {
 ###################################
 
 # using only Python 2.7, for now ...
-function check_req_pyver {
+function _check_req_pyver {
 
     local has_pyver=0
     local has_venv=0
@@ -129,7 +138,7 @@ function run_custom_postinstall {
     check_req_pyenv
 
     # use pyenv to boostrap req py ver if user wants
-    [[ "$NOERR" != "0" ]] && return || check_req_pyver
+    [[ "$NOERR" != "0" ]] && return || _check_req_pyver
     [[ "$NOERR" != "0" ]] && return
 }
 
