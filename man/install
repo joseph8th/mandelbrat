@@ -1,0 +1,23 @@
+.\" Manpage for install.
+.\" Contact  to correct errors or typos.
+.TH man 1 "06 Jan 2016" "0.3" "install man page"
+.SH NAME
+install \- install mandelbrat or dependencies
+.SH SYNOPSIS
+install [--help] [--version] COMMAND [OPTS]
+.SH DESCRIPTION
+Install mandelbrat or just the dependencies.
+.SH COMMANDS
+.IP "install "
+install app or resources
+.IP "uninstall "
+uninstall app only
+.IP "reinstall "
+reinstall app only
+.SH install:
+.IP "-d --dep-only "
+install non-Pythonic system dependencies only
+.SH "EXIT STATUS"
+Exits with status $ERRNO.
+.SH AUTHOR
+Joseph Edwards VIII <jedwards8th@gmail.com>
