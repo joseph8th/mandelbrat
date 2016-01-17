@@ -35,7 +35,12 @@ ARGIX=0              # current index of ARGS in PARAM
 
 readonly SCRIPT=$(basename $0)
 readonly SCRIPT_DIR=$(readlink -m $(dirname $0))
-readonly SCRIPT_SH="${SCRIPT}.sh"    # put your code in ${SCRIPT}.sh
+[[ -e "${SCRIPT_DIR}/.${SCRIPT}" ]] \
+    && readonly SCRIPT_CFG_DIR="${SCRIPT_DIR}/.${SCRIPT}" \
+    || readonly SCRIPT_CFG_DIR="${SCRIPT_DIR}"
+
+# put your code in ${SCRIPT}.sh
+readonly SCRIPT_SH="${SCRIPT_CFG_DIR}/${SCRIPT}.sh"
 source "${SCRIPT_SH}"
 
 
@@ -148,7 +153,8 @@ function _gen_man {
     fi
 
     # self options - with args and help
-    if ! _is_empty "${SELF_OPTS}"; then
+    echo "${CMD_OPTS[self]}"
+    if ! _is_empty "${CMD_OPTS[self]}"; then
         str="${str}.SH OPTIONS\n"
 
         self_opts=( ${CMD_SHORTOPTS[self]} )

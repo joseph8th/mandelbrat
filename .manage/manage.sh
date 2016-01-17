@@ -2,8 +2,8 @@
 
 ####  CONFIGURABLES  #################################################
 
-readonly DEBUG=0
-readonly MAN_HELP=1    # 0=text help, 1=man help
+readonly DEBUG=1
+readonly MAN_HELP=0    # 0=text help, 1=man help
 readonly MAN_TYPE=1    # a command by man standards
 readonly VERSION="0.3"
 
@@ -48,8 +48,14 @@ SELF_OPTS_HELP=( \
 COMMANDS=( "install" "uninstall" "reinstall" )
 
 CMD_HELP[install]="install app or resources"
-CMD_OPTS[install]="d dep-only"
-CMD_OPTS_HELP[d]="install non-Pythonic system dependencies only"
+CMD_OPTS[install]="d dep-only t target"
+
+CMD_OPTARGS[t]="TARGET"
+
+CMD_OPTS_HELP=( \
+    [d]="install non-Pythonic system dependencies only" \
+    [t]="install to TARGET directory (DEFAULT: ~/.mbrat)" \
+    )
 
 CMD_HELP[uninstall]="uninstall app only"
 CMD_HELP[reinstall]="reinstall app only"
@@ -75,6 +81,16 @@ readonly SEE_ALSO=
 # Must be named `_run_CMD` for each CMD in COMMANDS.
 # Define each CMD function below. All your logic goes here.
 # Use parsed CMD, OPTS[] with OPTARGS[opt], and ARGS[arg] here.
+
+# Some globals, constants & defaults
+readonly DEFINE_KEYS=( \
+    COMMANDD ROOTD MAINF USRD CONFD BASHRC \
+    )
+
+INSTALL_PROG=
+INSTALL_VER=
+declare -A DEFINE
+DEFAULT_INSTALL=true
 
 # _run_self should always be defined and should minimally _print_help
 function _run_self {
@@ -113,9 +129,79 @@ function self_as_command {
 }
 
 
+#### INSTALL subcommand ##############################################
+
+function _run_install {
+
+    # TODO
+    echo "DEF_DEFINE: ${DEF_DEFINE[@]}"
+
+    local install_rootd=
+
+    for opt in "${OPTS}"; do
+        case $opt in
+            t)
+                target=$(_trim "${OPTARGS[$opt]}")
+                install_rootd=$(readlink -m "$target")
+                [[ ! -e "$install_rootd" ]] && mkdir -p "$install_rootd"
+                ;;
+        esac
+    done
+
+    # TODO
+    echo $install_rootd
+
+    # Initialize some stuff
+    init_cfg_vars
+    make_define_py "$install_rootd"
+
+}
+
+function init_cfg_vars {
+    # source bash cfg parser & read the manage cfg
+    source "${SCRIPT_CFG_DIR}/read_ini.sh"
+    read_ini "${SCRIPT_CFG_DIR}/${SCRIPT}.cfg" -p CFG
+
+    # set $PROG from .cfg
+    INSTALL_PROG=$CFG__PROG__PROG
+    INSTALL_VER=$CFG__PROG__PROG_VER
+}
+
+function make_define_py {
+    local install_rootd="$1"
+    DEFINE[COMMANDD]="/usr/local/bin"
+
+    if _is_empty "$install_rootd"; then
+        DEFINE[ROOTD]="/home/${USER}/.${INSTALL_PROG}"
+        DEFINE[MAINF]="${DEF_ROOTD}/${INSTALL_PROG}.py"
+        DEFINE[USRD]="${DEF_ROOTD}/usr"
+        DEFINE[CONFD]="/home/${USER}/.config/${INSTALL_PROG}"
+    else
+        DEFINE[ROOTD]="${install_rootd}"
+        DEFINE[MAINF]="${install_rootd}/${INSTALL_PROG}.py"
+        DEFINE[USRD]="${install_rootd}/usr"
+        DEFINE[CONFD]="${install_rootd}/${INSTALL_PROG}rc.d"
+    fi
+
+    # generate 'mbrat/define.py' based on 'pacbrat.cfg' settings
+    local define_py="${DEFINE[ROOTD]}/${INSTALL_PROG}/define.py"
+    [ -e "$define_py" ] && rm "$define_py"
+
+    define_str="\
+MBRAT_PROG=\'${INSTALL_PROG}\'\n\
+MBRAT_VER=\'${INSTALL_VER}\'\n\
+MBRAT_PYVER=\'${CFG__REQUIRES__PYTHON_SHORT_VER}\'\n\
+DEF_COMMANDD=\'${DEFINE[COMMANDD]}\'\n\
+DEF_ROOTD=\'${DEFINE[ROOTD]}\'\n\
+DEF_MAINF=\'${DEFINE[MAINF]}\'\n\
+DEF_USRD=\'${DEFINE[USRD]}\'\n\
+DEF_CONFD=\'${DEFINE[CONFD]}\'\n"
+
+    printf $define_str > "$define_py"
+}
 
 
-####  COMMAND FUNCTIONS  #############################################
+#### EXAMPLE COMMAND FUNCTIONS  ######################################
 
 # copy the skel directory and files to chosen destination
 function copy_skel {

@@ -1,5 +1,4 @@
 *~
-.*
 *#*
 
 *.pyx
@@ -11,5 +10,7 @@ _*/
 build/
 tmp/
 usr/
+man/
 
+.python-version
 mbrat/define.py
