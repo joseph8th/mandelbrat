@@ -23,7 +23,7 @@ class SecManager(object):
         self.config.add_section(self.section)
         self.read()
 
-    # top-level object attr accessors/mutators 
+    # top-level object attr accessors/mutators
 
     def set_section_configf(self, section, configf):
         self.section = section
@@ -117,7 +117,7 @@ class SecManager(object):
             return arg_d
 
         return Arguments(arg_d)
-        
+
 
 
 class ConfigManager(object):
@@ -244,7 +244,7 @@ class ConfigManager(object):
         errstr = self.err
         self.err = ""
         return errstr
-    
+
     def _log(self, msg):
         self.log += "{}\n".format(msg)
 
@@ -277,9 +277,9 @@ class ConfigManager(object):
 
     def set_current_cfg_by_name(self, cfg_t, cfgname):
         """
-        Set '_current' configf by top-section and name. Uses SecManager. 
+        Set '_current' configf by top-section and name. Uses SecManager.
         Cascades dependencies to set current config in 'child' SecManager(s).
-        For example: set 'profile' -> set ['privkey', 'pubkey'] 
+        For example: set 'profile' -> set ['privkey', 'pubkey']
 
         """
 
@@ -288,7 +288,7 @@ class ConfigManager(object):
             return False
         self.secmgr[cfg_t].read()
 
-        self.set_current_cfg( self.secmgr[cfg_t].parentd, 
+        self.set_current_cfg( self.secmgr[cfg_t].parentd,
                               self.secmgr[cfg_t].configf )
         return True
 
@@ -296,7 +296,7 @@ class ConfigManager(object):
     def get_configf(self, cfg_t, cfgname, dironly=False, cfglink=False):
         """
         Get configf from dir structure, not SecManager methods. """
-        
+
         # is there even a dir named cfgname?
         if not cfgname in self.get_cfg_list(cfg_t):
             return None
@@ -305,7 +305,7 @@ class ConfigManager(object):
         if cfglink:
             configf = path.join( self.get_cfg_parentd(cfg_t), cfgname )
         else:
-            configf = path.join( self.get_cfg_parentd(cfg_t), cfgname, 
+            configf = path.join( self.get_cfg_parentd(cfg_t), cfgname,
                                  "{}.cfg".format(cfgname) )
         # check for file
         if not path.exists(configf):
@@ -365,7 +365,7 @@ class ConfigManager(object):
         configd = path.join( targetd, cfgname )
         args_d = {
             'cfgname': cfgname, 'configd': configd,
-            'configf': path.join( configd, "{}.cfg".format(cfgname) ), 
+            'configf': path.join( configd, "{}.cfg".format(cfgname) ),
             'mksubd_l': [ path.join(configd, subd) for subd in subd_l ],
             'targetd': targetd, 'prop_d': prop_d,
             }
@@ -430,7 +430,7 @@ class ConfigManager(object):
         if cfg_t == 'pool':
             prop_d = MBRAT_DEF_POOL_D.copy()
             prop_d[cfg_t].update( {'name': cfgname,} )
-            args = self._mkcfg_args( cfgname, self.poolsd, ['data',], prop_d ) 
+            args = self._mkcfg_args( cfgname, self.poolsd, ['data',], prop_d )
 
         elif cfg_t == 'poolkey':
             targetd = self.get_cfg_parentd(cfg_t)
@@ -537,4 +537,3 @@ class ConfigManager(object):
         privpubf = os.readlink(cur_pubf)
         if dironly:
             return path.dirname(privpubf)
-

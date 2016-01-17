@@ -20,37 +20,34 @@ Requirements
 Because `mbrat` uses multiple-precision complex and floating-point numbers, it requires:
 
 - GNU/Linux operating system with Gtk+ 3 libraries
-- Python-2.7
-- `easy_install-2.7` installed to your `python2.7` path (*)
-- [git](http://git-scm.com/download/linux) - for installation and updates
 - [gmp](http://gmplib.org/) >= 5.0.x
 - [mpfr](http://www.mpfr.org/mpfr-current/#download) >= 3.1.0
 - [mpc](http://www.multiprecision.org/index.php?prog=mpc&page=download) >= 1.0
 - [cairo](http://cairographics.org/download/) - for GUI
 
-(*) Required Python packages will be installed by executing the `mbrat-install` script using `easy_install-2.7`.
+In addition there are the Pythonic requirements:
 
-Install Procedure
------------------
+- Python-2.7 installed _system-wide_ (ever try to install `GObject Introspection` in a `virtualenv`?)
+- `setuptools` - to use `easy_install-2.7`
+- `pypng` - we need to do `import png`
+- `gmpy2` - we need to do `import gmpy2`
 
-Execute the following statements in your shell (do _not_ type the prompt, `$`) :
+Installation
+------------
+
+Execute the following statements in your shell:
 
     $ git clone https://github.com/joseph8th/mandelbrat.git
     $ cd mandelbrat
-    $ ./pacbrat -i
 
-Install Help
-------------
+MandelBrat may now be executed directly as a Python script:
 
-Instead of last step above, just execute:
+    $ ./mbrat.py -h
 
-    $ ./pacbrat -h
+Or install in-place, if you like:
 
-Version Notes
--------------
-
-- This version of `pacbrat` here has limited function. Future versions will be generalized and forked to a side project to allow configured deployment of Pythonic "Brats" to further enhance project deployment using standard tools.
-- This version of `mbrat` would like install a 'usr' configuration tree in your `$HOME/.config/` directory, and itself in a `$HOME/.mbrat directory`, with an executable in your `/usr/local/bin`.
+    $ sudo ln -s ./mbrat.py /usr/local/bin/mbrat
+    $ mbrat -h
 
 
 Usage
@@ -67,11 +64,16 @@ To run MandelBrat from the command line, execute one of the following:
 
 To run the MandelBrat GUI, run the following command:
 
-    $ mbrat gui 
+    $ mbrat gui
 
 
 Changelog
 =========
+
+0.2a (2015-01-17)
+-----------------
+
+- Eliminated installer rubbish - this is a dev toy, not a product, so users will just have to bite the bullet and install dependencies directly.
 
 0.2 (2014-02-01)
 -----------------

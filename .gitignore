@@ -11,6 +11,8 @@ build/
 tmp/
 usr/
 man/
+pkg/
+*_bak*/
 
 .python-version
 mbrat/define.py
