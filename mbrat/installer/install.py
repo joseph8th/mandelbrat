@@ -3,7 +3,7 @@ from os import path
 from shutil import copy2, copytree, rmtree, ignore_patterns, Error
 
 from mbrat.util import execSubproc, mb_mkdirs
-    
+
 from mbrat.configmgr import ConfigManager
 from mbrat.settings import MBRAT_PROG, MBRAT_VER, MBRAT_PYD, MBRAT_PYVER, \
     MBRAT_CONFD, MBRAT_LIB_SRCD, MBRAT_LIB_OBJN_L, MBRAT_LIB_OBJEXT, \
@@ -11,7 +11,7 @@ from mbrat.settings import MBRAT_PROG, MBRAT_VER, MBRAT_PYD, MBRAT_PYVER, \
 
 
 def _install_usrd():
-    
+
     print "Installing 'usr' configuration to\n  -> %s" % (MBRAT_HOME_USRD)
 
     if path.exists(MBRAT_HOME_USRD):
@@ -55,9 +55,9 @@ def _install_shared_libs(install_path):
     # execute 'python setup.py build_ext' in subprocess
     if not path.isdir(MBRAT_LIB_SRCD):
         return False
-        
+
     libd = path.join(build_path, 'lib')
-    run = execSubproc( [[MBRAT_PYVER, 'setup.py', 'build_ext', '--build-lib', libd],], 
+    run = execSubproc( [[MBRAT_PYVER, 'setup.py', 'build_ext', '--build-lib', libd],],
                        shell=False )
     if not run:
         return False
@@ -91,22 +91,22 @@ def _install_dirs(install_path):
     # copy python scripts ...
     err_l = []
     try:
-        copytree( path.join(install_path, 'mbrat'), 
-                  path.join(MBRAT_CONFD, 'mbrat'), 
+        copytree( path.join(install_path, 'mbrat'),
+                  path.join(MBRAT_CONFD, 'mbrat'),
                   ignore=ignore_patterns('*~', '*#*'), symlinks=True )
     except Error as e:
         err_l.extend(e)
 
     # copy etc ...
     try:
-        copytree( path.join(install_path, 'etc'), 
+        copytree( path.join(install_path, 'etc'),
                   path.join(MBRAT_CONFD, 'etc'),
                   ignore=ignore_patterns('*~', '*#*'), symlinks=True )
     except Error as e:
         err_l.extend(e)
 
     # copy executable script ...
-    copy2( path.join(install_path, 'mbrat.py'), 
+    copy2( path.join(install_path, 'mbrat.py'),
            path.join(MBRAT_CONFD) )
     if not path.exists( path.join(MBRAT_CONFD, 'mbrat.py') ):
         err_l.append( (path.join(install_path, 'mbrat.py'),
@@ -162,7 +162,7 @@ def _install_exec():
         os.chmod(tmp_cmd, 0755)
 
     # copy temp command file into /usr/local/bin or elsewhere on $PATH
-    run = execSubproc( [['sudo', 'cp', tmp_cmd, MBRAT_CMDF],], 
+    run = execSubproc( [['sudo', 'cp', tmp_cmd, MBRAT_CMDF],],
                        shell=False )
     if not run:
         return False
@@ -214,7 +214,7 @@ def _uninstall():
         return False
 
     if path.isfile(MBRAT_CMDF):
-        run = execSubproc( [['sudo', 'rm', MBRAT_CMDF],], 
+        run = execSubproc( [['sudo', 'rm', MBRAT_CMDF],],
                            shell=False )
         if not run:
             return False
